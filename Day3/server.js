@@ -7,10 +7,21 @@ const app = express();
 
 app.use(express.json())
 
+let notes = []
+
 // Notes APi
 app.post('/notes',(req,res)=>{
     console.log(req.body);
+    notes.push(req.body)
+    res.json({
+        message : "Note added successfully",
+        notes : notes
+    })
     
+})
+
+app.get('/notes',(req,res)=>{
+    res.json(notes)
 })
 
 app.listen(3000,(req,res)=>{
