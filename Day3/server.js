@@ -24,6 +24,16 @@ app.get('/notes',(req,res)=>{
     res.json(notes)
 })
 
+// delete /notes/:index
+
+app.delete('/notes/:index',(req,res)=>{
+    const index = req.params.index
+    delete notes[index]
+    res.json({
+        message : "Note deleted successfully"
+    })
+})
+
 app.listen(3000,(req,res)=>{
     console.log('Server is running on port 3000')
 })
