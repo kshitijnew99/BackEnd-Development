@@ -63,6 +63,25 @@ app.delete('/notes/:id', async (req,res)=>{
 })
 
 
+app.patch('/notes/:id', async (req,res)=>{
+    
+   const noteId = req.params.id
+   const {title} = req.body
+
+    await noteModel.findOneAndUpdate({
+        _id : noteId
+    },{
+        title:title
+    })
+
+   res.send({
+    message:"Note updated successfully",
+    
+   })
+
+})
+
+
 
 app.listen(3000,()=>{
     console.log("Server is running on port 3000");
