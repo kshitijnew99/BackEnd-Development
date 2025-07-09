@@ -47,17 +47,23 @@ app.get('/notes', async (req,res)=>{
 
 
 
-// app.get('/notes', async (req,res)=>{
+app.delete('/notes/:id', async (req,res)=>{
     
+   const noteId = req.params.id
+
+    await noteModel.findOneAndDelete({
+        _id : noteId
+    })
+
+   res.send({
+    message:"Note deleted successfully",
     
-//    const notes = await noteModel.find()
+   })
 
-//    res.send({
-//     message:"Note fetch successfully",
-//     notes
-//    })
+})
 
-// })
+
+
 app.listen(3000,()=>{
     console.log("Server is running on port 3000");
 })
