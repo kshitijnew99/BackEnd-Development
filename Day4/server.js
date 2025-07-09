@@ -32,6 +32,32 @@ app.post('/notes', async (req,res)=>{
 
 })
 
+
+app.get('/notes', async (req,res)=>{
+    
+    
+   const notes = await noteModel.find()
+
+   res.send({
+    message:"Note fetch successfully",
+    notes
+   })
+
+})
+
+
+
+// app.get('/notes', async (req,res)=>{
+    
+    
+//    const notes = await noteModel.find()
+
+//    res.send({
+//     message:"Note fetch successfully",
+//     notes
+//    })
+
+// })
 app.listen(3000,()=>{
     console.log("Server is running on port 3000");
 })
