@@ -37,7 +37,7 @@ const FaceMoodDetector = () => {
         const mood = Object.entries(expressions).reduce((a, b) => a[1] > b[1] ? a : b)[0];
         console.log('Current Mood:', mood);
       }
-    }, 300);
+    }, 1000);
 
     return () => clearInterval(interval);
   };
