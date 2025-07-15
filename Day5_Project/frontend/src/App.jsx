@@ -1,8 +1,11 @@
 import React from 'react'
+import FaceMoodDetector from "../src/components/FaceMoodDetector"
 
 const App = () => {
   return (
-    <div>App</div>
+    <div>
+      <FaceMoodDetector />
+    </div>
   )
 }
 
