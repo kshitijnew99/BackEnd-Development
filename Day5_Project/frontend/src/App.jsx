@@ -1,5 +1,6 @@
-import React from 'react'
-import FaceMoodDetector from "../src/components/FaceMoodDetector"
+
+import FaceMoodDetector from "../src/components/FaceMoodDetector";
+import './index.scss';
 
 const App = () => {
   return (

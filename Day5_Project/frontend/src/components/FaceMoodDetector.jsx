@@ -44,15 +44,13 @@ const FaceMoodDetector = () => {
 
   return (
     <div>
-      <video
-        ref={videoRef}
-        autoPlay
-        muted
-        width="720"
-        height="560"
-        onPlay={onPlay}
-        style={{ border: '2px solid #444', borderRadius: '10px' }}
-      />
+      <video 
+      className='video' 
+      ref={videoRef} 
+      autoPlay 
+      muted 
+      onPlay={onPlay} />
+
     </div>
   );
 };
