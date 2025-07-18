@@ -4,9 +4,9 @@ import './index.scss';
 
 const App = () => {
   return (
-    <div>
+    <>
       <FaceMoodDetector />
-    </div>
+    </>
   )
 }
 

@@ -42,14 +42,19 @@ const FaceMoodDetector = () => {
     return () => clearInterval(interval);
   };
 
+  // const detecthandler = () => {
+
+  // }
+
   return (
-    <div>
+    <div className='facemood'>
       <video 
       className='video' 
       ref={videoRef} 
       autoPlay 
       muted 
       onPlay={onPlay} />
+      <button   className='detect'>Detect</button>
 
     </div>
   );
