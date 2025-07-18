@@ -4,25 +4,29 @@
   box-sizing: border-box;
 }
 
-html, body {
+html, body, #root {
   height: 100%;
   width: 100%;
-  background-color: gray;
 }
 
 .facemood {
-  height: 100%;
   width: 100%;
-  background-color: red;
-  padding-left: 40px;
 }
 .facemood .video {
-  height: 200px;
+  -o-object-fit: cover;
+     object-fit: cover;
+  width: 25%;
+  aspect-ratio: 13/9;
   border-radius: 40px;
-  background-color: yellow;
+  border: solid 1px black;
 }
 .facemood .detect {
   height: 40px;
   width: 120px;
   border-radius: 20px;
+  font-size: 20px;
+  border: solid 1px black;
+}
+.facemood .detect:active {
+  scale: 0.9;
 }/*# sourceMappingURL=index.css.map */

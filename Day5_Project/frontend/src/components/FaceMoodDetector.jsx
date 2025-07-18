@@ -56,6 +56,7 @@ const FaceMoodDetector = () => {
         autoPlay 
         muted 
         />
+        <br />
         <button  onClick={detectHandler} className='detect'>Detect</button>
 
       </div>
