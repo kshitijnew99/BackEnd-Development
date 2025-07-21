@@ -2,31 +2,97 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: "Inter", sans-serif;
 }
 
-html, body, #root {
-  height: 100%;
-  width: 100%;
+body {
+  background-color: #f6f4f9;
+  color: #1a1a1a;
+  padding: 2rem;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+}
+
+.header {
+  font-weight: 600;
+  font-size: 2rem;
+  margin-bottom: 2rem;
 }
 
 .facemood {
-  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 3rem;
 }
 .facemood .video {
+  width: 180px;
+  height: 180px;
+  border-radius: 12px;
   -o-object-fit: cover;
      object-fit: cover;
-  width: 25%;
-  aspect-ratio: 13/9;
-  border-radius: 40px;
-  border: solid 1px black;
+  background-color: #ccc;
 }
-.facemood .detect {
-  height: 40px;
-  width: 120px;
-  border-radius: 20px;
-  font-size: 20px;
-  border: solid 1px black;
+.facemood .info {
+  max-width: 400px;
 }
-.facemood .detect:active {
-  scale: 0.9;
+.facemood .info h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+.facemood .info p {
+  color: #6b6b6b;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  margin-bottom: 1rem;
+}
+.facemood .info .detect {
+  padding: 0.6rem 1.2rem;
+  background-color: #6a0dad;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.facemood .info .detect:hover {
+  background-color: #4d097e;
+}
+
+.recommended h3 {
+  font-size: 1.2rem;
+  margin-bottom: 1.2rem;
+}
+.recommended .track {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+.recommended .track .details {
+  display: flex;
+  flex-direction: column;
+}
+.recommended .track .details .title {
+  font-size: 1rem;
+  font-weight: 500;
+}
+.recommended .track .details .artist {
+  font-size: 0.9rem;
+  color: #6b6b6b;
+}
+.recommended .track .play-btn {
+  width: 20px;
+  height: 20px;
+  border: solid 1.8px #444;
+  border-width: 10px 0 10px 16px;
+  background: transparent;
+  -webkit-clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+          clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
 }/*# sourceMappingURL=index.css.map */
