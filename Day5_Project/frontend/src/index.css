@@ -29,7 +29,7 @@ body {
   margin-bottom: 3rem;
 }
 .facemood .video {
-  width: 180px;
+  width: 240px;
   height: 180px;
   border-radius: 12px;
   -o-object-fit: cover;
@@ -52,7 +52,7 @@ body {
 }
 .facemood .info .detect {
   padding: 0.6rem 1.2rem;
-  background-color: #6a0dad;
+  background-color: #000080;
   color: white;
   border: none;
   border-radius: 8px;
@@ -61,7 +61,7 @@ body {
   transition: 0.3s;
 }
 .facemood .info .detect:hover {
-  background-color: #4d097e;
+  background-color: #00004d;
 }
 
 .recommended h3 {

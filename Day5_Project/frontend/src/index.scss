@@ -1,9 +1,12 @@
+// Color Variables
 $primary-color: #6a0dad;
 $text-color: #1a1a1a;
 $subtext-color: #6b6b6b;
 $bg-color: #f6f4f9;
 $border-radius: 12px;
+$button-color: #000080; // navy in hex for reliable SCSS darken()
 
+// Base Styles
 * {
   margin: 0;
   padding: 0;
@@ -28,6 +31,7 @@ body {
   margin-bottom: 2rem;
 }
 
+// FaceMood Section
 .facemood {
   display: flex;
   align-items: center;
@@ -35,7 +39,7 @@ body {
   margin-bottom: 3rem;
 
   .video {
-    width: 180px;
+    width: 240px;
     height: 180px;
     border-radius: $border-radius;
     object-fit: cover;
@@ -60,7 +64,7 @@ body {
 
     .detect {
       padding: 0.6rem 1.2rem;
-      background-color: $primary-color;
+      background-color: $button-color;
       color: white;
       border: none;
       border-radius: 8px;
@@ -69,12 +73,13 @@ body {
       transition: 0.3s;
 
       &:hover {
-        background-color: darken($primary-color, 10%);
+        background-color: darken($button-color, 10%);
       }
     }
   }
 }
 
+// Recommended Tracks Section
 .recommended {
   h3 {
     font-size: 1.2rem;
