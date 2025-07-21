@@ -27,7 +27,7 @@ const App = () => {
               <div className="title">{track.title}</div>
               <div className="artist">{track.artist}</div>
             </div>
-            <div className="play-btn"></div>
+            <i  className="ri-play-line"></i>
           </div>
         ))}
       </div>

@@ -70,10 +70,11 @@ body {
       border-radius: 8px;
       font-weight: 500;
       cursor: pointer;
-      transition: 0.3s;
+      transition: 0.1s all ease-in-out ;
 
-      &:hover {
+      &:active {
         background-color: darken($button-color, 10%);
+        scale: 0.95;
       }
     }
   }
@@ -108,13 +109,12 @@ body {
       }
     }
 
-    .play-btn {
+    .ri-play-line {
       width: 20px;
       height: 20px;
-      border: solid 1.8px #444;
       border-width: 10px 0 10px 16px;
       background: transparent;
-      clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+    //   clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
     }
   }
 }

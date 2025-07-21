@@ -58,10 +58,11 @@ body {
   border-radius: 8px;
   font-weight: 500;
   cursor: pointer;
-  transition: 0.3s;
+  transition: 0.1s all ease-in-out;
 }
-.facemood .info .detect:hover {
+.facemood .info .detect:active {
   background-color: #00004d;
+  scale: 0.95;
 }
 
 .recommended h3 {
@@ -87,12 +88,9 @@ body {
   font-size: 0.9rem;
   color: #6b6b6b;
 }
-.recommended .track .play-btn {
+.recommended .track .ri-play-line {
   width: 20px;
   height: 20px;
-  border: solid 1.8px #444;
   border-width: 10px 0 10px 16px;
   background: transparent;
-  -webkit-clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
-          clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
 }/*# sourceMappingURL=index.css.map */

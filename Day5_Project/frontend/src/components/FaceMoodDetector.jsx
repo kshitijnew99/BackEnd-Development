@@ -56,8 +56,11 @@ const FaceMoodDetector = () => {
         autoPlay 
         muted 
         />
-        <br />
-        <button  onClick={detectHandler} className='detect'>Detect</button>
+        <div className='info'>
+          <h2>Face Mood Detector</h2>
+          <p>Click the button below to detect your current mood based on your expression.</p>
+          <button onClick={detectHandler} className='detect'>Detect</button>
+        </div>
 
       </div>
     );
