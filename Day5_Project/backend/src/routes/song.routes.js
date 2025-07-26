@@ -1,12 +1,12 @@
 const express = require('express')
 
 
-const routes = express.Router()
+const router = express.Router()
 
 
-routes.post('/song',(req,res)=>{
+router.post('/song',(req,res)=>{
     
 })
 
 
-module.exports = routes; 
+module.exports = router; 
