@@ -8,12 +8,13 @@ const app = express();
 app.use(express.json()); // works only when data is sends in raw format
 
 /*
-we have to send 
+when we send data in form-data , then we have to use multer
 */
 
 
-app.use('/song', songRoutes)
+app.use('/', songRoutes)
 
 module.exports = app
 
 
+ 
