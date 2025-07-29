@@ -8,3 +8,20 @@ var imagekit = new ImageKit({
     privateKey : process.env.imagekit_privateKey,
     urlEndpoint : process.env.imagekit_URL
 });
+
+function uploadFile(file){
+    return new Promise((resolve, reject) => {
+        imagekit.upload({
+            file:file.buffer,
+            fileName:file.originalname
+        },(error,result)=>{
+            if(error){
+                reject(error);
+            }else{
+                resolve(result);
+            }
+        })
+    })
+} 
+
+module.exports = uploadFile;
