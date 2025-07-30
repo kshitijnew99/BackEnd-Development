@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import * as faceapi from 'face-api.js';
 
-const FaceMoodDetector = () => {
+const FaceMoodDetector = ({ setSongs }) => {
   const videoRef = useRef();
 
   const loadModels = async () => {
@@ -39,14 +39,9 @@ const FaceMoodDetector = () => {
   };
 
   useEffect(() => {
-
       loadModels().then(startVideo); 
 
   }, []);
-
-    
-  
-  
 
   return (
       <div className='facemood'>
