@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import * as faceapi from 'face-api.js';
+import axios from 'axios';
 
 const FaceMoodDetector = ({ setSongs }) => {
   const videoRef = useRef();
@@ -34,7 +35,10 @@ const FaceMoodDetector = ({ setSongs }) => {
     if (detections.length > 0) {
       const expressions = detections[0].expressions;
       const mood = Object.entries(expressions).reduce((a, b) => a[1] > b[1] ? a : b)[0];
-      console.log('Current Mood:', mood);
+
+      /* get - http://localhost:3000/song */
+      axios.get(`http://localhost:3000/song?mood=${mood}`)
+      // console.log('Current Mood:', mood);
     }
   };
 
