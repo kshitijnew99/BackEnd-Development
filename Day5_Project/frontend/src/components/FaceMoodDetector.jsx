@@ -37,7 +37,10 @@ const FaceMoodDetector = ({ setSongs }) => {
       const mood = Object.entries(expressions).reduce((a, b) => a[1] > b[1] ? a : b)[0];
 
       /* get - http://localhost:3000/song */
-      axios.get(`http://localhost:3000/song?mood=${mood}`)
+      axios.get(`http://localhost:3000/song?mood=${mood}`).then(res=>{
+        console.log(res.data);
+        setSongs(res.data.song)
+      })
       // console.log('Current Mood:', mood);
     }
   };

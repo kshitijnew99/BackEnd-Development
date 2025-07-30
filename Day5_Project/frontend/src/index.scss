@@ -107,14 +107,40 @@ body {
         font-size: 0.9rem;
         color: $subtext-color;
       }
+
+      .mood{
+        font-size: 0.8rem;
+        color: $subtext-color; 
+      }
     }
 
-    .ri-play-line {
-      width: 20px;
-      height: 20px;
-      border-width: 10px 0 10px 16px;
-      background: transparent;
-    //   clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+    .buttons{
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      .audio-file{
+        border: solid 1px black;
+        border-radius: 50px;
+      }
+
+      .ri-pause-line{
+        width: 20px;
+        height: 20px;
+        border-width: 10px 0 10px 16px;
+        background: transparent;
+      }
+
+      .ri-play-circle-fill {
+        width: 20px;
+        height: 20px;
+        border-width: 10px 0 10px 16px;
+        background: transparent;
+      //   clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+      }
+
+
     }
+
   }
 }
