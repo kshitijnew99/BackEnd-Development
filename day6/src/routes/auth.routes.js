@@ -8,10 +8,17 @@ router.use((req,res,next)=>{
     
 })
 
-router.get("/",(req,res)=>{
+router.get("/auth",(req,res)=>{
     res.json({
         message : "/ REST API created"
     })
+})
+
+
+router.post("/auth/register",(req,res)=>{
+    const {username,pasword} = req.body;
+
+    const isUserExist = username
 })
 
 module.exports = router;
