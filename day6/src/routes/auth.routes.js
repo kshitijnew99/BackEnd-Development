@@ -1,5 +1,6 @@
 const express = require('express');
 const userModel = require("../models/user.model")
+const jwt = require('jsonwebtoken')
 
 const router = express.Router();
 
@@ -17,9 +18,14 @@ router.post("/register", async (req,res)=>{
         username,password
     })
 
+    const token = jwt.sign({
+        id:user._id,
+    },process.env.JWT_SECRET)
+
     res.status(201).json({
         message:"user registered successfully",
-        user
+        user,
+        token
     })
 })
 
@@ -46,6 +52,20 @@ router.post('/login', async (req,res)=>{
     return res.status(200).json({
             message:"user logged in successfully",
     })
+})
+
+router.get('/user',(req,res)=>{
+    const {token} = req.body;
+
+    if(!token){
+        return res.status(401).json({
+            message:"Unauthorized"
+        })
+    }
+
+    const decode = jwt.verify(token , process.env.JWT_SECRET)
+
+    res.send(decode)
 })
 
 module.exports = router;
