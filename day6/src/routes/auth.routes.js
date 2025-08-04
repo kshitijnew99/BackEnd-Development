@@ -1,11 +1,12 @@
 const express = require('express');
 const userModel = require("../models/user.model")
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 
 const router = express.Router();
 
 router.use((req,res,next)=>{
-    console.log('this middleware is btw router and API');
+    // console.log('this middleware is btw router and API');
     next();
     
 })
@@ -22,10 +23,12 @@ router.post("/register", async (req,res)=>{
         id:user._id,
     },process.env.JWT_SECRET)
 
+    res.cookie("token", token)
+
     res.status(201).json({
         message:"user registered successfully",
-        user,
-        token
+        user
+        
     })
 })
 
@@ -54,8 +57,8 @@ router.post('/login', async (req,res)=>{
     })
 })
 
-router.get('/user',(req,res)=>{
-    const {token} = req.body;
+router.get('/user', async (req,res)=>{
+    const {token} = req.cookies;
 
     if(!token){
         return res.status(401).json({
@@ -63,9 +66,26 @@ router.get('/user',(req,res)=>{
         })
     }
 
-    const decode = jwt.verify(token , process.env.JWT_SECRET)
+    try {
 
-    res.send(decode)
+        const decode = jwt.verify(token , process.env.JWT_SECRET)
+        
+        const user = await userModel.findOne({
+            id:decode._id
+        }).select("-password -__v") 
+
+        res.status(200).json({
+            message:"user data fetch successfully",
+            user
+        })
+
+    } catch (error) {
+
+        return res.status(401).json({
+            message:"invalid token"
+
+        })
+    }
 })
 
 module.exports = router;
