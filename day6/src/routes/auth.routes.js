@@ -48,8 +48,6 @@ router.post("/register", async (req,res)=>{
 })
 
 
-
-
 router.post('/login', async (req,res)=>{
     const {username,password} = req.body;
 
@@ -75,6 +73,8 @@ router.post('/login', async (req,res)=>{
     })
 })
 
+
+
 router.get('/user', async (req,res)=>{
     const {token} = req.cookies;
 
@@ -85,9 +85,8 @@ router.get('/user', async (req,res)=>{
     }
 
     try {
+        const decode = jwt.verify(token , process.env.JWT_SECRET) // return the data we use to create the token
 
-        const decode = jwt.verify(token , process.env.JWT_SECRET)
-        
         const user = await userModel.findOne({
             id:decode._id
         }).select("-password -__v") 
@@ -96,14 +95,11 @@ router.get('/user', async (req,res)=>{
             message:"user data fetch successfully",
             user
         })
-
-    } catch (error) {
-
+    } 
+    catch (error) {
         return res.status(401).json({
             message:"invalid token"
-
         })
     }
 })
-
 module.exports = router;
