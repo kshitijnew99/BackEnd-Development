@@ -5,6 +5,11 @@ const cookieParser = require('cookie-parser');
 
 const router = express.Router();
 
+/* 4 step of :-- Validation ++++ data correct form me hai ki nahi
+                 Verification  ++++ data sahi hai ki nahi
+                 Authentication ++++ user kon hai
+                 Authorization ---- ek user kya kya kar sakta hai*/
+
 router.use((req,res,next)=>{
     // console.log('this middleware is btw router and API');
     next();
@@ -14,6 +19,16 @@ router.use((req,res,next)=>{
 
 router.post("/register", async (req,res)=>{
     const {username,password} = req.body;
+
+    const isUserExists = await userModel.findOne({
+        username:username
+    })
+
+    if(isUserExists){
+        return res.status(409).json({
+            message:`${username} User already in use` 
+        })
+    }
 
     const user = await userModel.create({
         username,password
@@ -31,6 +46,9 @@ router.post("/register", async (req,res)=>{
         
     })
 })
+
+
+
 
 router.post('/login', async (req,res)=>{
     const {username,password} = req.body;
