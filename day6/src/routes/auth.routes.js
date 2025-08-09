@@ -62,6 +62,7 @@ router.post('/login', async (req,res)=>{
     }
 
     const isPasswordValid = password == isUserExists.password;
+
     if(!isPasswordValid){
         return res.status(401).json({
             message:"invalid password"
@@ -102,4 +103,14 @@ router.get('/user', async (req,res)=>{
         })
     }
 })
+
+router.get('/logout', async (req,res)=>{
+    res.clearCookie("token");
+
+    res.status(200).json({
+        message:"user logged out successfully"
+    })
+})
+
+
 module.exports = router;
