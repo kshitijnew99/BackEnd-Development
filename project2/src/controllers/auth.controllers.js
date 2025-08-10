@@ -10,7 +10,7 @@ async function registerController(req,res){
     })
 
     if(isUserExist){
-        res.status(409).json({
+        return res.status(409).json({
             message: `${username} - User already exist`
         })
     }
@@ -27,8 +27,11 @@ async function registerController(req,res){
 
     return res.status(201).json({
         message: "User created successfully",
-        user
-    })
+        user: {
+            id: user._id,
+            username: user.username
+        }
+    });
 }
 
 async function loginController(req,res){
@@ -40,7 +43,7 @@ async function loginController(req,res){
     })
 
     if(!isUserExist){
-        res.status(400).json({
+        return res.status(400).json({
             message: `${username} - User not found`
         })
     }
