@@ -5,15 +5,7 @@ const ai = new GoogleGenAI({
     apiKey: "AIzaSyD806OwOV3K9YEdldHBByqtT3pa7RiCggQ"
 });
 
-async function main() {
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: "Explain how AI works in a 30 words",
-  });
-  console.log(response.text);
-}
 
-main();
 
 
 async function generateCaption(base64ImageFile){
@@ -24,12 +16,21 @@ async function generateCaption(base64ImageFile){
             data: base64ImageFile, // is the data type to represent the image into string or text
             },
         },
-        { text: "Caption this image." },
+        { text: "Caption this image ." },
     ];
 
     const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: contents,
+        config:{
+            systemInstruction:` 
+                you are an expert in generating captions for images. 
+                you generate single caption for an image
+                the caption should be under 40 words
+                you use hashtag and emojis in the captions.
+                the caption should be dark humor
+            ` // systemInstruction tell how our model behaves
+        }
     });
 
     return response.text;
