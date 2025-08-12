@@ -16,21 +16,24 @@ async function main() {
 main();
 
 
-async function generateContent(base64ImageFile){
+async function generateCaption(base64ImageFile){
     const contents = [
         {
             inlineData: {
             mimeType: "image/jpeg",
-            data: base64ImageFile,
+            data: base64ImageFile, // is the data type to represent the image into string or text
             },
         },
         { text: "Caption this image." },
     ];
 
     const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: contents,
+        model: "gemini-2.5-flash",
+        contents: contents,
     });
+
     return response.text;
 }
 
+
+module.exports = generateCaption
