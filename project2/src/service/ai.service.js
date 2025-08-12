@@ -8,9 +8,29 @@ const ai = new GoogleGenAI({
 async function main() {
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
-    contents: "Explain how AI works in a few words",
+    contents: "Explain how AI works in a 30 words",
   });
   console.log(response.text);
 }
 
 main();
+
+
+async function generateContent(base64ImageFile){
+    const contents = [
+        {
+            inlineData: {
+            mimeType: "image/jpeg",
+            data: base64ImageFile,
+            },
+        },
+        { text: "Caption this image." },
+    ];
+
+    const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: contents,
+    });
+    return response.text;
+}
+
