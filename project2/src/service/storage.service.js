@@ -10,7 +10,8 @@ var imagekit = new ImageKit({
 async function uploadFile(file,filename){
     const response = await imagekit.upload({
         file: file,
-        filename: filename
+        fileName: filename,
+        folder:"CaptionGenerator"
     })
 
     return response

@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 
 const postSchema = new mongoose.Schema({
-    immage:String,
+    image:String,
     caption:String,
     user:{ // user ki id chahiye
         type:mongoose.Schema.Types.ObjectId,

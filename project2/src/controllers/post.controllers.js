@@ -10,15 +10,21 @@ async function createPostController(req,res) {
     const base64ImageFile = new Buffer.from(file.buffer).toString('base64');
 
     const caption = await generateCaption(base64ImageFile);
+
     const result = await uploadFile(file.buffer,file.originalname)
 
     console.log("Generated Caption : --  ", caption);
 
-    res.json({
-        caption,
-        result
+    const post  = await postModel.create({
+        image:result.url,
+        caption:caption,
+        user: req.user._id
     })
     
+    res.status(201).json({
+        message: "Post created successfully",
+        post
+    })
 
 }
 
