@@ -8,7 +8,11 @@ const app = express()
 app.use(express.json())
 app.use(cookieParser())
 
-app.use('/auth',authRoutes)
-app.use('/post',postRoutes)
+console.log("Registering /auth routes...");
+app.use('/auth', authRoutes);
+
+console.log("Registering /post routes...");
+app.use('/post', postRoutes);
+
 
 module.exports = app;

@@ -10,7 +10,7 @@ async function authmiddleware (req,res,next){
     }
     
     try {
-        const decode = jwt.verify(token,process.env.jwt_secretkey)
+        const decode = jwt.verify(token,process.env.JWT_SECRETKEY)
 
         const user = await userModel.findOne({
             _id:decode.id

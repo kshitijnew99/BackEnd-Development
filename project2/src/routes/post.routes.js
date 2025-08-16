@@ -11,7 +11,6 @@ router.post('/file', // /post/ :- only gets the image file
     authmiddleware, // req.user = user  
     upload.single('image'),
     createPostController
-    
 )
 
 
