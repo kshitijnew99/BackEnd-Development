@@ -1,0 +1,7 @@
+Jb socket.io create hota hai tk ek event bnta hai
+
+2 typw of Event in Socket IO
+
+in-built event => "connection" and "disconnect"
+
+custom-event => build by ourself like the "message" event
