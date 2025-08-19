@@ -17,11 +17,11 @@ io.on("connection", (socket) => {
   socket.on("Question",async (data)=>{
     console.log("Received AI message");
     const response = await generateResponse(data.prompt)
-    console.log("AI response : ",response);
+    console.log("AI result : ",response);
     socket.emit("Answer", {response})
 
   })
-  
+
 });
 httpServer .listen(3000,()=>{
     console.log("server is running on port 3000");
