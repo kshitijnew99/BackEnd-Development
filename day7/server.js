@@ -17,7 +17,7 @@ io.on("connection", (socket) => {
   socket.on("Question",async (data)=>{
     console.log("Received AI message");
     const response = await generateResponse(data.prompt)
-    console.log("AI response : ",response);
+    console.log("AI response  : ",response);
     socket.emit("Answer", {response})
 
   })
