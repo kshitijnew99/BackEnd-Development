@@ -1,3 +1,9 @@
+io => server
+socket => single user
+
+on => event listen krna
+emit => event send(fire) krna
+
 Jb socket.io create hota hai tk ek event bnta hai
 
 2 typw of Event in Socket IO
