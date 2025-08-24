@@ -10,28 +10,39 @@ const httpServer = http.createServer(app);
 // Create WebSocket server on top of HTTP server
 const wss = new WebSocketServer({ server: httpServer });
 
+const chatHistory = [
+
+]
+
 wss.on("connection", (ws) => {
   console.log("WebSocket connected ✅");
 
   ws.on("message", async (message) => {
-    try {
-      // Expecting JSON messages
-      const data = JSON.parse(message.toString());
+    const data = JSON.parse(message.toString());
       console.log("Received:", data);
 
       if (data.prompt) {
-        const response = await generateResponse(data.prompt);
+
+        chatHistory.push({
+          role:"user",
+          parts: [{text:data.prompt}]
+        })
+
+        const response = await generateResponse(chatHistory);
+
+        chatHistory.push({
+          role:"model",
+          parts: [{text:response}]
+        })
+
         console.log("AI response:", response);
 
         // Send back JSON
         ws.send(JSON.stringify({ response }));
-      } else {
+      }
+      else{
         ws.send(JSON.stringify({ error: "Missing 'prompt' field" }));
       }
-    } catch (err) {
-      console.error("Error:", err);
-      ws.send(JSON.stringify({ error: "Invalid message format" }));
-    }
   });
 
   ws.on("close", () => {
