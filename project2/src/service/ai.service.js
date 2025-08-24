@@ -16,7 +16,7 @@ async function generateCaption(base64ImageFile){
             data: base64ImageFile, // is the data type to represent the image into string or text
             },
         },
-        { text: "Caption this image ." },
+        { text: " Caption this image ." },
     ];
 
     const response = await ai.models.generateContent({
