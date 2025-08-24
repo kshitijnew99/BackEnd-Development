@@ -35,7 +35,7 @@ wss.on("connection", (ws) => {
           parts: [{text:response}]
         })
 
-        console.log("AI response:", response);
+        console.log("AI response: ", response);
 
         // Send back JSON
         ws.send(JSON.stringify({ response }));
