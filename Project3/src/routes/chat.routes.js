@@ -1,9 +1,13 @@
 const express = require('express')
+const authMiddleware = require("../middlewares/auth.middleware")
+
 const router = express.Router()
-const chatController = require('../controllers/chat.controllers')
 
 
-router.post('/',chatController)
+
+
+
+router.post('/',authMiddleware.authUser)
 
 
 

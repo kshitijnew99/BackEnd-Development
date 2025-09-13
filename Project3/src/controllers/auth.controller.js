@@ -76,7 +76,7 @@ async function LoginUser(req,res) {
     process.env.JWT_TOKEN
   );
 
-  res.cookie("token ", token);
+  res.cookie("token", token);
 
   res.status(201).json({
       message: "User Login successfully",
