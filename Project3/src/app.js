@@ -1,11 +1,19 @@
 const express = require('express')
 const cookieParser = require('cookie-parser')
-const authRoutes = require("./routes/auth.routes")
 
+
+/* Routes */
+const authRoutes = require("./routes/auth.routes")
+const chatRoutes = require("./routes/chat.routes")
+
+/* Middleware */
 const app = express();
 app.use(express.json())
 app.use(cookieParser())
+
+/* Using Routes */
 app.use('/auth',authRoutes)
+app.use('/chat',chatRoutes)
 
 
 
