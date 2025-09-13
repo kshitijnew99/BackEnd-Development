@@ -6,7 +6,7 @@ const router = express.Router()
 
 
 
-
+/* POST /chat/ */
 
 router.post('/',authMiddleware.authUser,chatController.createChat)
 
