@@ -13,7 +13,8 @@ function initSocketServer(httpServer){
     io.use(async (socket,next)=>{
 
         const cookies = cookie.parse(socket.handshake.headers.cookie || ""); 
-        /** code to extract value of cookie passed at postman header side */
+        /** code to extract value of cookie passed at postman header side or
+         *  something cookie.parse get a undefined values so we added || "" to privent this situation */
 
 
         console.log("Socket connection cooies :", cookies);
