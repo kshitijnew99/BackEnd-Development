@@ -3,6 +3,7 @@ const {Server}  =  require("socket.io");
 const cookie = require("cookie")
 const jwt = require("jsonwebtoken")
 const userModel = require("../models/user.models")
+const generateResponse = require("../services/ai.service").generateResponse
 
 function initSocketServer(httpServer){
 
@@ -18,7 +19,7 @@ function initSocketServer(httpServer){
 
         
         if(!cookies.token){
-            next(new Error("Authentication error : no token provider"));
+            return next(new Error("Authentication error : no token provider"));
         }
 
         try {
@@ -44,7 +45,11 @@ function initSocketServer(httpServer){
         socket.on("ai-message",async (datapayload)=>{
 
 
-            console.log("data payload ----->",datapayload);
+            const aiResponse = await generateResponse(datapayload.message);
+
+            socket.emit("ai-response",{
+                message : aiResponse
+            })
             
         })
         
