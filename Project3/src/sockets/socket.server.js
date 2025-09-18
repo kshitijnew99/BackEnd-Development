@@ -19,6 +19,7 @@ function initSocketServer(httpServer){
 
         console.log("Socket connection cooies :", cookies);
 
+        
         if(!cookies.token){
             next(new Error("Authentication error : no token provider"));
         }
@@ -42,10 +43,10 @@ function initSocketServer(httpServer){
         
     })
 
-
-
     // socket.io starting server
     io.on("connection", (socket)=>{
+        console.log("connected User : ", socket.user);
+        
         console.log("New socket connection : " , socket.id);
         
     })
