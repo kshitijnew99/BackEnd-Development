@@ -38,9 +38,7 @@ function initSocketServer(httpServer){
             next(new Error("Authentication error : Invalid Token"))
         }
 
-
         next();
-        
     })
 
     // socket.io starting server
