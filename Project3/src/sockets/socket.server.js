@@ -12,12 +12,9 @@ function initSocketServer(httpServer){
     // socket.io middleware 
     io.use(async (socket,next)=>{
 
-        const cookies = cookie.parse(socket.handshake.headers.cookie || ""); 
+        const cookies = cookie.parse(socket.handshake.headers?.cookie || ""); 
         /** code to extract value of cookie passed at postman header side or
          *  something cookie.parse get a undefined values so we added || "" to privent this situation */
-
-
-        console.log("Socket connection cooies :", cookies);
 
         
         if(!cookies.token){
@@ -25,7 +22,7 @@ function initSocketServer(httpServer){
         }
 
         try {
-            const decode = jwt.verify(cookies.token, process.env.JWT_TOKEN)
+            const decode = jwt.verify(cookies.token, process.env.JWT_TOKEN) // checking token is valid or not
 
             const user = await userModel.findById(decode.id)
 
@@ -38,14 +35,18 @@ function initSocketServer(httpServer){
             next(new Error("Authentication error : Invalid Token"))
         }
 
-        next();
+        // next();
     })
 
     // socket.io starting server
     io.on("connection", (socket)=>{
-        console.log("connected User : ", socket.user);
-        
-        console.log("New socket connection : " , socket.id);
+
+        socket.on("ai-message",async (datapayload)=>{
+
+
+            console.log("data payload ----->",datapayload);
+            
+        })
         
     })
 
