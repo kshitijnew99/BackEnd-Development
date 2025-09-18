@@ -1,61 +1,48 @@
-const {Server}  =  require("socket.io");
-// import { init } from "../models/chat.models";
-const cookie = require("cookie")
-const jwt = require("jsonwebtoken")
-const userModel = require("../models/user.models")
-const generateResponse = require("../services/ai.service").generateResponse
+const { Server } = require("socket.io");
+const cookie = require("cookie");
+const jwt = require("jsonwebtoken");
+const userModel = require("../models/user.models");
+const { generateResponse } = require("../services/ai.service");
 
-function initSocketServer(httpServer){
+function initSocketServer(httpServer) {
+    const io = new Server(httpServer, {});
 
-    const io = new Server(httpServer,{})
+    // socket.io middleware
+    io.use(async (socket, next) => {
+        const cookies = cookie.parse(socket.handshake.headers?.cookie || "");
 
-
-    // socket.io middleware 
-    io.use(async (socket,next)=>{
-
-        const cookies = cookie.parse(socket.handshake.headers?.cookie || ""); 
-        /** code to extract value of cookie passed at postman header side or
-         *  something cookie.parse get a undefined values so we added || "" to privent this situation */
-
-        
-        if(!cookies.token){
+        if (!cookies.token) {
             return next(new Error("Authentication error : no token provider"));
         }
 
         try {
-            const decode = jwt.verify(cookies.token, process.env.JWT_TOKEN) // checking token is valid or not
-
-            const user = await userModel.findById(decode.id)
-
+            const decode = jwt.verify(cookies.token, process.env.JWT_TOKEN);
+            const user = await userModel.findById(decode.id);
             socket.user = user;
-
             next();
-
-
         } catch (error) {
-            next(new Error("Authentication error : Invalid Token"))
+            return next(new Error("Authentication error : Invalid Token"));
         }
-
-        // next();
-    })
+    });
 
     // socket.io starting server
-    io.on("connection", (socket)=>{
-
-        socket.on("ai-message",async (datapayload)=>{
-
-
-            const aiResponse = await generateResponse(datapayload.message);
-
-            socket.emit("ai-response",{
-                message : aiResponse
-            })
-            
-        })
-        
-    })
-
+    io.on("connection", (socket) => {
+        socket.on("ai-message", async (MessagePayload) => {
+            console.log("Received ai-message:", MessagePayload); 
+            try {
+                // Gemini expects contents as an array of objects
+                const aiResponse = await generateResponse([{ text: MessagePayload.content }]);
+                socket.emit("ai-response", {
+                    content: aiResponse,
+                    chat: MessagePayload.chat
+                });
+            } catch (error) {
+                socket.emit("ai-response", {
+                    error: error.message
+                });
+            }
+        });
+    });
 }
 
-
-module.exports = initSocketServer
+module.exports = initSocketServer;
