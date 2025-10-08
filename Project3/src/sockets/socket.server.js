@@ -5,6 +5,7 @@ const userModel = require("../models/user.models");
 const { generateResponse } = require("../services/ai.service");
 
 function initSocketServer(httpServer) {
+
     const io = new Server(httpServer, {});
 
     // socket.io middleware
@@ -24,7 +25,7 @@ function initSocketServer(httpServer) {
             return next(new Error("Authentication error : Invalid Token"));
         }
     });
-
+    
     // socket.io starting server
     io.on("connection", (socket) => {
         socket.on("ai-message", async (MessagePayload) => {
@@ -36,6 +37,8 @@ function initSocketServer(httpServer) {
                     content: aiResponse,
                     chat: MessagePayload.chat
                 });
+                console.log("Sent ai-response:", aiResponse);
+                
             } catch (error) {
                 socket.emit("ai-response", {
                     error: error.message

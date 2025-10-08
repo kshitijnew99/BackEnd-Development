@@ -91,4 +91,4 @@ async function LoginUser(req,res) {
 
 }
 
-module.exports = { RegisterUser  , LoginUser};
+module.exports = { RegisterUser  , LoginUser };
