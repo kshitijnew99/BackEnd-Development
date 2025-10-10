@@ -10,16 +10,26 @@ function initSocketServer(httpServer) {
 
     // socket.io middleware
     io.use(async (socket, next) => {
-        const cookies = cookie.parse(socket.handshake.headers?.cookie || "");
+
+        
+        const cookies = cookie.parse(socket.handshake.headers?.cookie || ""); 
+        /*cookie is need to extract the cookie from the token
+         give in the header from the postman*/ 
 
         if (!cookies.token) {
             return next(new Error("Authentication error : no token provider"));
         }
 
         try {
+
             const decode = jwt.verify(cookies.token, process.env.JWT_TOKEN);
+
             const user = await userModel.findById(decode.id);
+
             socket.user = user;
+            // console.log("User Connected :", socket.user);
+            
+
             next();
         } catch (error) {
             return next(new Error("Authentication error : Invalid Token"));
