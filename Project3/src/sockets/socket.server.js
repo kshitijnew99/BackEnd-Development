@@ -3,8 +3,9 @@ const cookie = require("cookie");
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/user.models");
 const { generateResponse } = require("../services/ai.service");
+const messageModel = require("../models/message.models");
 
-function initSocketServer(httpServer) {
+function initSocketServer(httpServer) { 
 
     const io = new Server(httpServer, {});
 
@@ -38,16 +39,40 @@ function initSocketServer(httpServer) {
     
     // socket.io starting server
     io.on("connection", (socket) => {
+
+
         socket.on("ai-message", async (MessagePayload) => {
+
             console.log("Received ai-message:", MessagePayload); 
+
+            await messageModel.create({
+                chatId : MessagePayload.chatId,
+                user : socket.user._id,
+                content : MessagePayload.content,
+                role : "user"
+            })
+
+
             try {
                 // Gemini expects contents as an array of objects
                 const aiResponse = await generateResponse([{ text: MessagePayload.content }]);
+
+                await messageModel.create({
+                    chatId : MessagePayload.chatId,
+                    user : socket.user._id,
+                    content : aiResponse,
+                    role : "model"
+                })
+
+                // Send the AI response back to the client
                 socket.emit("ai-response", {
                     content: aiResponse,
-                    chat: MessagePayload.chat
+                    chat: MessagePayload.chatId
                 });
-                console.log("Sent ai-response:", aiResponse);
+
+                console.log("ai-response:", aiResponse);
+
+                
                 
             } catch (error) {
                 socket.emit("ai-response", {

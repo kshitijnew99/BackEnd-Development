@@ -11,6 +11,7 @@ async function generateResponse(contentArr) {
             contents: contentArr // should be [{ text: "..." }]
         });
         return response.text;
+        
     } catch (error) {
         throw new Error(error.message || "AI service error");
     }
