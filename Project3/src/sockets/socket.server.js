@@ -5,82 +5,83 @@ const userModel = require("../models/user.models");
 const { generateResponse } = require("../services/ai.service");
 const messageModel = require("../models/message.models");
 
-function initSocketServer(httpServer) { 
+function initSocketServer(httpServer) {
+  const io = new Server(httpServer, {});
 
-    const io = new Server(httpServer, {});
+  // socket.io middleware
+  io.use(async (socket, next) => {
+    const cookies = cookie.parse(socket.handshake.headers?.cookie || "");
+    /*cookie is need to extract the cookie from the token
+         give in the header from the postman*/
 
-    // socket.io middleware
-    io.use(async (socket, next) => {
+    if (!cookies.token) {
+      return next(new Error("Authentication error : no token provider"));
+    }
 
-        
-        const cookies = cookie.parse(socket.handshake.headers?.cookie || ""); 
-        /*cookie is need to extract the cookie from the token
-         give in the header from the postman*/ 
+    try {
+      const decode = jwt.verify(cookies.token, process.env.JWT_TOKEN);
 
-        if (!cookies.token) {
-            return next(new Error("Authentication error : no token provider"));
-        }
+      const user = await userModel.findById(decode.id);
 
-        try {
+      socket.user = user;
+      // console.log("User Connected :", socket.user);
 
-            const decode = jwt.verify(cookies.token, process.env.JWT_TOKEN);
+      next();
+    } catch (error) {
+      return next(new Error("Authentication error : Invalid Token"));
+    }
+  });
 
-            const user = await userModel.findById(decode.id);
+  // socket.io starting server
+  io.on("connection", (socket) => {
+    socket.on("ai-message", async (MessagePayload) => {
+      // console.log("Received ai-message:", MessagePayload);
 
-            socket.user = user;
-            // console.log("User Connected :", socket.user);
-            
+      await messageModel.create({
+        chatId: MessagePayload.chatId,
+        user: socket.user._id,
+        content: MessagePayload.content,
+        role: "user",
+      });
 
-            next();
-        } catch (error) {
-            return next(new Error("Authentication error : Invalid Token"));
-        }
-    });
-    
-    // socket.io starting server
-    io.on("connection", (socket) => {
+      const chatHistory = await messageModel.find({
+        chatId: MessagePayload.chatId,
+      });
 
+      
 
-        socket.on("ai-message", async (MessagePayload) => {
+      try {
+        // Gemini expects contents as an array of objects
+        const aiResponse = await generateResponse(
+            chatHistory.map(item =>{
+                return {
+                    role: item.role,
+                    text : item.content
+                }
+            })  
+        );
 
-            console.log("Received ai-message:", MessagePayload); 
-
-            await messageModel.create({
-                chatId : MessagePayload.chatId,
-                user : socket.user._id,
-                content : MessagePayload.content,
-                role : "user"
-            })
-
-
-            try {
-                // Gemini expects contents as an array of objects
-                const aiResponse = await generateResponse([{ text: MessagePayload.content }]);
-
-                await messageModel.create({
-                    chatId : MessagePayload.chatId,
-                    user : socket.user._id,
-                    content : aiResponse,
-                    role : "model"
-                })
-
-                // Send the AI response back to the client
-                socket.emit("ai-response", {
-                    content: aiResponse,
-                    chat: MessagePayload.chatId
-                });
-
-                console.log("ai-response:", aiResponse);
-
-                
-                
-            } catch (error) {
-                socket.emit("ai-response", {
-                    error: error.message
-                });
-            }
+        await messageModel.create({
+          chatId: MessagePayload.chatId,
+          user: socket.user._id,
+          content: aiResponse,
+          role: "model",
         });
+
+        // Send the AI response back to the client
+        socket.emit("ai-response", {
+          content: aiResponse,
+          chat: MessagePayload.chatId,
+        });
+
+        console.log("ai-response:", aiResponse);
+      } catch (error) {
+        socket.emit("ai-response", {
+          error: error.message,
+        });
+      }
     });
+  });
 }
 
 module.exports = initSocketServer;
