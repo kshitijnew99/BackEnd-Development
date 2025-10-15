@@ -44,7 +44,7 @@ function initSocketServer(httpServer) {
         role: "user",
       });
 
-      /*Sort by createdAt in ascending order 
+      /*Sort by createdAt in ascending order  
       Limit: so that model do not use to many token
       Lean:
       reverse: bcz of createAt = -1 chat history order get reverse so that we use reverse() to reverse it back*/
