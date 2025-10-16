@@ -2,8 +2,11 @@ const { Server } = require("socket.io");
 const cookie = require("cookie");
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/user.models");
-const { generateResponse } = require("../services/ai.service");
+const { generateResponse, generateVector } = require("../services/ai.service");
 const messageModel = require("../models/message.models");
+const { createVectorMemory, queryMemory } = require("../services/vector.service");
+
+
 
 function initSocketServer(httpServer) {
   const io = new Server(httpServer, {});
@@ -34,6 +37,7 @@ function initSocketServer(httpServer) {
 
   // socket.io starting server
   io.on("connection", (socket) => {
+
     socket.on("ai-message", async (MessagePayload) => {
       // console.log("Received ai-message:", MessagePayload);
 
@@ -43,6 +47,19 @@ function initSocketServer(httpServer) {
         content: MessagePayload.content,
         role: "user",
       });
+
+      // Generate embedding vector for the user's message
+      const vector = await generateVector(MessagePayload.content)
+
+      await createVectorMemory({
+        vector ,
+        messageId : "49814262",
+        metadata : {
+          chatId: MessagePayload.chatId,
+          user: socket.user._id
+        }
+      })
+      
 
       /*Sort by createdAt in ascending order  
       Limit: so that model do not use to many token
