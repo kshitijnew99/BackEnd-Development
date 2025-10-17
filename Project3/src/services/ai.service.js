@@ -20,19 +20,23 @@ async function generateResponse(contentArr) {
 
 async function generateVector(content){
     try {
+        // console.log("Generating vector for content:", content.substring(0, 50) + "...");
+
         const response = await ai.models.embedContent({
-        model: 'gemini-embedding-001',
+        model: 'text-embedding-004',
         contents: content,
         config : {
             outputDimensionality: 768
         }
     });
 
+    // console.log("Vector generated successfully, length:", response.embeddings[0].values.length);
+
     return response.embeddings[0].values;
 
     } catch (error) {
-        console.log(error);
-        
+        console.error("Vector generation failed:", error.message);
+        throw error; // Re-throw to handle in calling function
     }
 }
 

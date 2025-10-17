@@ -41,7 +41,7 @@ function initSocketServer(httpServer) {
     socket.on("ai-message", async (MessagePayload) => {
       // console.log("Received ai-message:", MessagePayload);
 
-      await messageModel.create({
+      const message = await messageModel.create({
         chatId: MessagePayload.chatId,
         user: socket.user._id,
         content: MessagePayload.content,
@@ -52,13 +52,22 @@ function initSocketServer(httpServer) {
       const vector = await generateVector(MessagePayload.content)
 
       await createVectorMemory({
-        vector ,
-        messageId : "49814262",
+        vector,
+        messageId : message._id,
         metadata : {
           chatId: MessagePayload.chatId,
-          user: socket.user._id
+          user: socket.user._id,
+          text: MessagePayload.content
         }
       })
+      
+      const memory = await queryMemory({
+        queryVector : vector,
+        limit : 1,
+        metadata : {}
+      })
+
+      // console.log(memory);
       
 
       /*Sort by createdAt in ascending order  
@@ -71,7 +80,7 @@ function initSocketServer(httpServer) {
       }).sort({ createdAt: 1 }).limit(20).lean()).reverse() 
        
 
-      
+
 
       try {
         // Gemini expects contents as an array of objects
@@ -84,20 +93,41 @@ function initSocketServer(httpServer) {
             })  
         );
 
-        await messageModel.create({
+        const responseMessage = await messageModel.create({
           chatId: MessagePayload.chatId,
           user: socket.user._id,
           content: aiResponse,
           role: "model",
         });
 
+        console.log("Generated AI Response:", aiResponse);
+        
+        const responseVector = await generateVector(aiResponse)
+
+        // console.log("Generated Response Vector:", responseVector ? "✓ Success" : "✗ Failed");
+
+        try {
+          await createVectorMemory({
+            vector: responseVector,
+            messageId: responseMessage._id,
+            metadata: {
+              chatId: MessagePayload.chatId,
+              user: socket.user._id,
+              text: aiResponse
+            }
+          })
+          console.log("Stored in Pinecone:", "✓ Success");
+        } catch (vectorError) {
+          console.error("Pinecone storage failed:", vectorError.message);
+        }
+
+
         // Send the AI response back to the client
         socket.emit("ai-response", {
           content: aiResponse,
           chat: MessagePayload.chatId,
         });
-
-        console.log("ai-response:", aiResponse);
+        
       } catch (error) {
         socket.emit("ai-response", {
           error: error.message,

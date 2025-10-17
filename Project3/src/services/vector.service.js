@@ -10,17 +10,26 @@ const ChatgptCloneIndex = pc.Index('chatgpt-clone');
 
 
 async function createVectorMemory({vector,messageId,metadata}){
-    await ChatgptCloneIndex.upsert([{
-        id:messageId,
-        values:vector,
-        metadata:metadata
-    }])
+    try {
+        
+        await ChatgptCloneIndex.upsert([{
+            id: messageId.toString(),
+            values: vector,
+            metadata: metadata
+        }]);
+        
+        console.log("Successfully stored in Pinecone");
+    } catch (error) {
+        console.error("Pinecone upsert error:", error.message);
+        throw error;
+    }
 }
 
 
-async function queryMemory({queryVecotr, limit = 5 ,metadata}){
+async function queryMemory({queryVector, limit = 5 ,metadata}){
+
     const data = await ChatgptCloneIndex.query({
-        vectoer:queryVecotr,
+        vector:queryVector,
         topK:limit,
         includeMetadata:true,
         filter:metadata ? {metadata} : undefined
