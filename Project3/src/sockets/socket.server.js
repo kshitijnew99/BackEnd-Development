@@ -40,91 +40,94 @@ function initSocketServer(httpServer) {
 
     socket.on("ai-message", async (MessagePayload) => {
       
-
-      const message = await messageModel.create({
-        chatId: MessagePayload.chatId,
-        user: socket.user._id,
-        content: MessagePayload.content,
-        role: "user",
-      });
-
-      // Generate embedding vector for the user's message
-      const vector = await generateVector(MessagePayload.content)
-
-      await createVectorMemory({
-        vector,
-        messageId : message._id,
-        metadata : {
+      // SEQUENCE: 1 2 4 (parallel execution)
+      const [message, vector] = await Promise.all([
+        // Task 1: User message save to DB
+        messageModel.create({
           chatId: MessagePayload.chatId,
           user: socket.user._id,
-          text: MessagePayload.content
-        }
-      })
+          content: MessagePayload.content,
+          role: "user",
+        }),
+        // Task 2: Generate vector for user message
+        generateVector(MessagePayload.content),
+        // Task 4: Save user message in pinecone (can run with 1&2 since it only needs the results)
+        createVectorMemory({
+          vector,
+          messageId: message._id,
+          metadata: {
+            chatId: MessagePayload.chatId,
+            user: socket.user._id,
+            text: MessagePayload.content
+          }
+        })
+      ]);
       
-      // user's vector memory, it is independent of chat history
-      const memory = await queryMemory({
-        queryVector : vector,
-        limit : 1,
-        metadata : {}
-      })
+      // SEQUENCE: 3 5 (parallel execution)
+      const [memory, chatHistory] = await Promise.all([
+        // Task 3: Query pinecone for related memories
+        queryMemory({
+          queryVector: vector,
+          limit: 1,
+          metadata: {}
+        }),
+        // Task 5: Get chat history from DB
+        messageModel.find({
+          chatId: MessagePayload.chatId,
+        }).sort({ createdAt: 1 }).limit(20).lean().reverse()
+      ]);
 
-      /*Sort by createdAt in ascending order  
-      Limit: so that model do not use to many token
-      Lean:
-      reverse: bcz of createAt = -1 chat history order get reverse so that we use reverse() to reverse it back*/
-      const chatHistory = (await messageModel.find({
-        chatId: MessagePayload.chatId,
-      }).sort({ createdAt: 1 }).limit(20).lean()).reverse() 
+      
+      const stm = chatHistory.map(item => ({
+        role: item.role,
+        text: item.content
+      }));
 
-      const stm = chatHistory.map(item =>{
-                return {
-                    role: item.role,
-                    text : item.content
-                }
-      })
+      const ltm = [{
+        role: "system",
+        text: `These are some previous message from the chat, to generate response 
+        ${memory.map(item => item.metadata.text).join("\n")}`
+      }];
 
-      const ltm = [
-        {
-          role: "system",
-          text : `These are some previous message from the chat, to gnerate response 
-          ${memory.map(item => item.metadata.text).join("\n")}
-          `
-        }
-      ]
+      console.log("Long term memory:", ltm, "Short term memory:", stm);
 
-      console.log("Long term memory :",ltm,"Short term memory :",stm);
-
-      // Gemini expects contents as an array of objects
+      // SEQUENCE: 6 (sequential execution)
+      // Task 6: Generate response from AI
       const aiResponse = await generateResponse([...ltm, ...stm]);
 
-      const responseMessage = await messageModel.create({
+      // SEQUENCE: 10 (sequential execution)
+      // Task 10: Send/emit AI response to user
+      socket.emit("ai-response", {
+        content: aiResponse,
+        chat: MessagePayload.chatId,
+      });
+
+      console.log("Generated AI Response:", aiResponse);
+
+      // SEQUENCE: 7 8 (parallel execution)
+      const [responseMessage, responseVector] = await Promise.all([
+        // Task 7: Save AI response in DB
+        messageModel.create({
           chatId: MessagePayload.chatId,
           user: socket.user._id,
           content: aiResponse,
           role: "model",
-      });  
+        }),
+        // Task 8: Generate vector from AI response
+        generateVector(aiResponse)
+      ]);
 
-      console.log("Generated AI Response:", aiResponse);
-        
-      const responseVector = await generateVector(aiResponse)
-
-        // console.log("Generated Response Vector:", responseVector ? "✓ Success" : "✗ Failed");
-
+      // SEQUENCE: 9 (sequential execution)
+      // Task 9: Save AI message in PineCone
       await createVectorMemory({
-            vector: responseVector,
-            messageId: responseMessage._id,
-            metadata: {
-              chatId: MessagePayload.chatId,
-              user: socket.user._id,
-              text: aiResponse
-            }
-      })  
-          
-      // Send the AI response back to the client
-      socket.emit("ai-response", {
-        content: aiResponse,
-        chat: MessagePayload.chatId,
-      });    
+        vector: responseVector,
+        messageId: responseMessage._id,
+        metadata: {
+          chatId: MessagePayload.chatId,
+          user: socket.user._id,
+          text: aiResponse
+        }
+      });
               
     });
   });
