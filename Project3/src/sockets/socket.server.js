@@ -39,7 +39,7 @@ function initSocketServer(httpServer) {
   io.on("connection", (socket) => {
 
     socket.on("ai-message", async (MessagePayload) => {
-      // console.log("Received ai-message:", MessagePayload);
+      
 
       const message = await messageModel.create({
         chatId: MessagePayload.chatId,
@@ -61,53 +61,56 @@ function initSocketServer(httpServer) {
         }
       })
       
+      // user's vector memory, it is independent of chat history
       const memory = await queryMemory({
         queryVector : vector,
         limit : 1,
         metadata : {}
       })
 
-      // console.log(memory);
-      
-
       /*Sort by createdAt in ascending order  
       Limit: so that model do not use to many token
       Lean:
       reverse: bcz of createAt = -1 chat history order get reverse so that we use reverse() to reverse it back*/
-
       const chatHistory = (await messageModel.find({
         chatId: MessagePayload.chatId,
       }).sort({ createdAt: 1 }).limit(20).lean()).reverse() 
-       
 
-
-
-      try {
-        // Gemini expects contents as an array of objects
-        const aiResponse = await generateResponse(
-            chatHistory.map(item =>{
+      const stm = chatHistory.map(item =>{
                 return {
                     role: item.role,
                     text : item.content
                 }
-            })  
-        );
+      })
 
-        const responseMessage = await messageModel.create({
+      const ltm = [
+        {
+          role: "system",
+          text : `These are some previous message from the chat, to gnerate response 
+          ${memory.map(item => item.metadata.text).join("\n")}
+          `
+        }
+      ]
+
+      console.log("Long term memory :",ltm,"Short term memory :",stm);
+
+      // Gemini expects contents as an array of objects
+      const aiResponse = await generateResponse([...ltm, ...stm]);
+
+      const responseMessage = await messageModel.create({
           chatId: MessagePayload.chatId,
           user: socket.user._id,
           content: aiResponse,
           role: "model",
-        });
+      });  
 
-        console.log("Generated AI Response:", aiResponse);
+      console.log("Generated AI Response:", aiResponse);
         
-        const responseVector = await generateVector(aiResponse)
+      const responseVector = await generateVector(aiResponse)
 
         // console.log("Generated Response Vector:", responseVector ? "✓ Success" : "✗ Failed");
 
-        try {
-          await createVectorMemory({
+      await createVectorMemory({
             vector: responseVector,
             messageId: responseMessage._id,
             metadata: {
@@ -115,24 +118,14 @@ function initSocketServer(httpServer) {
               user: socket.user._id,
               text: aiResponse
             }
-          })
-          console.log("Stored in Pinecone:", "✓ Success");
-        } catch (vectorError) {
-          console.error("Pinecone storage failed:", vectorError.message);
-        }
-
-
-        // Send the AI response back to the client
-        socket.emit("ai-response", {
-          content: aiResponse,
-          chat: MessagePayload.chatId,
-        });
-        
-      } catch (error) {
-        socket.emit("ai-response", {
-          error: error.message,
-        });
-      }
+      })  
+          
+      // Send the AI response back to the client
+      socket.emit("ai-response", {
+        content: aiResponse,
+        chat: MessagePayload.chatId,
+      });    
+              
     });
   });
 }
