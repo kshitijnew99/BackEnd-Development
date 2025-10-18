@@ -40,7 +40,7 @@ function initSocketServer(httpServer) {
 
     socket.on("ai-message", async (MessagePayload) => {
       
-      // SEQUENCE: 1 2 4 (parallel execution)
+      // SEQUENCE: 1 2  (parallel execution)
       const [message, vector] = await Promise.all([
         // Task 1: User message save to DB
         messageModel.create({
@@ -51,8 +51,11 @@ function initSocketServer(httpServer) {
         }),
         // Task 2: Generate vector for user message
         generateVector(MessagePayload.content),
-        // Task 4: Save user message in pinecone (can run with 1&2 since it only needs the results)
-        createVectorMemory({
+        
+      ]);
+      
+      // Task 4: Save user message in pinecone (can run with 1&2 since it only needs the results)
+      await createVectorMemory({
           vector,
           messageId: message._id,
           metadata: {
@@ -60,24 +63,26 @@ function initSocketServer(httpServer) {
             user: socket.user._id,
             text: MessagePayload.content
           }
-        })
-      ]);
-      
+      })
+
       // SEQUENCE: 3 5 (parallel execution)
-      const [memory, chatHistory] = await Promise.all([
+      const [memory, chatHistoryRow] = await Promise.all([
         // Task 3: Query pinecone for related memories
         queryMemory({
           queryVector: vector,
           limit: 1,
-          metadata: {}
+          metadata: {
+            user: socket.user._id
+          }
         }),
         // Task 5: Get chat history from DB
         messageModel.find({
           chatId: MessagePayload.chatId,
-        }).sort({ createdAt: 1 }).limit(20).lean().reverse()
+        }).sort({ createdAt: 1 }).limit(20).lean()
       ]);
 
-      
+      const chatHistory = chatHistoryRow.reverse();
+
       const stm = chatHistory.map(item => ({
         role: item.role,
         text: item.content
