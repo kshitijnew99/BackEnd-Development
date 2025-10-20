@@ -5,6 +5,8 @@ html, body, #root { height: 100%; }
 body {
   margin: 0;
   font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   background: radial-gradient(1200px 600px at 20% 0%, rgba(124,92,255,0.12), transparent 45%),
               radial-gradient(1000px 500px at 80% 10%, rgba(92,201,255,0.08), transparent 40%),
               var(--color-bg);

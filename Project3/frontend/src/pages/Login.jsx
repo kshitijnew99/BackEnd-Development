@@ -29,6 +29,13 @@ const Login = () => {
         }).
         then((res) => {
             console.log("Axios Response : ",res);
+            try {
+                const user = res?.data?.user || {
+                    firstName: res?.data?.firstName || 'User',
+                    email: form.email,
+                }
+                localStorage.setItem('user', JSON.stringify(user))
+            } catch (_) {}
             navigate("/");
         }).catch((err) => {
             console.log("Axios Error : ",err);
@@ -38,7 +45,8 @@ const Login = () => {
     }
 
     return (
-        <div className="container">
+        <div className="auth-layout">
+        <div className="container" style={{paddingTop: 0, paddingBottom: 0}}>
         <div className="card">
             <h1 className="heading">Welcome back</h1>
             <form className="form" onSubmit={handleSubmit}>
@@ -56,6 +64,7 @@ const Login = () => {
                 <Link className="link" to="/register">Create an account</Link>
             </div>
             </form>
+        </div>
         </div>
         </div>
     )

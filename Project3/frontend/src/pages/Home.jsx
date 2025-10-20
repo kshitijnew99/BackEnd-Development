@@ -58,6 +58,15 @@ const Home = () => {
     }))
     setInput('')
 
+    // If this is the first message for the chat, update its title from the text
+    setChats(prev => {
+      const next = prev.map(c => c.id === activeChatId ? { ...c, title: c.title === 'New chat' ? text.slice(0, 30) || 'New chat' : c.title } : c)
+      // Move the active chat to the top (most recent first)
+      const active = next.find(c => c.id === activeChatId)
+      const others = next.filter(c => c.id !== activeChatId)
+      return [active, ...others]
+    })
+
     // Simulate AI reply
     setTimeout(() => {
       const aiMsg = { id: uid(), role: 'ai', text: `You said: ${text}` }

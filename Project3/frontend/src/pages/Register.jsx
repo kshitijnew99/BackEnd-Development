@@ -30,8 +30,16 @@ const Register = () => {
         { withCredentials: true }
     ).
     then((res) => {
-            console.log("Axios Response : ",res);
-            navigate("/");
+      console.log("Axios Response : ",res);
+      try {
+        const user = res?.data?.user || {
+    firstName: form.firstName,
+    lastName: form.lastName,
+    email: form.email,
+        }
+        localStorage.setItem('user', JSON.stringify(user))
+      } catch (_) {}
+      navigate("/");
     }).catch((err) => {
             console.log("Axios Error : ",err);
     }).finally(() => {
@@ -40,7 +48,8 @@ const Register = () => {
       
   }
   return (
-    <div className="container">
+    <div className="auth-layout">
+      <div className="container" style={{paddingTop: 0, paddingBottom: 0}}>
       <div className="card">
         <h1 className="heading">Create your account</h1>
         <form className="form" onSubmit={handleSubmit}>
@@ -72,6 +81,7 @@ const Register = () => {
             <Link className="link" to="/login">Login</Link>
           </div>
         </form>
+      </div>
       </div>
     </div>
   )
