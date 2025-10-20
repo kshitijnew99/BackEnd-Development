@@ -30,7 +30,7 @@ const Register = () => {
 
           <button className="btn" type="submit">Create account</button>
 
-          <div className="between subtle">
+          <div className="subtle">
             <span>Already have an account?</span>
             <Link className="link" to="/login">Login</Link>
           </div>
