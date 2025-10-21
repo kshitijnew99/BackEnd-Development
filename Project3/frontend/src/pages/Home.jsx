@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { createChat as rtCreateChat, setActiveChat, addMessageToChat, setChatTitle } from '../store/chatSlice'
 import SidebarContent from '../components/chat/SidebarContent'
 import ChatHeader from '../components/chat/ChatHeader'
 import ChatMessages from '../components/chat/ChatMessages'
@@ -7,15 +9,11 @@ import ChatComposer from '../components/chat/ChatComposer'
 const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36)
 
 const Home = () => {
-  // Previous chats (left sidebar on desktop)
-  const [chats, setChats] = useState([
-    { id: 'c1', title: 'New chat' },
-  ])
-  const [activeChatId, setActiveChatId] = useState('c1')
+  const dispatch = useDispatch()
+  const chats = useSelector(state => state.chat.chats)
+  const activeChatId = useSelector(state => state.chat.activeChatId)
+  const messagesByChat = useSelector(state => state.chat.messagesByChat)
   const [drawerOpen, setDrawerOpen] = useState(false)
-
-  // Messages are stored per chat
-  const [messagesByChat, setMessagesByChat] = useState({ c1: [] })
 
   // User input
   const [input, setInput] = useState('')
@@ -32,16 +30,13 @@ const Home = () => {
   }, [messages, activeChatId])
 
   const createNewChat = () => {
-    const id = uid()
-    const title = 'New chat'
-    setChats(prev => [{ id, title }, ...prev])
-    setMessagesByChat(prev => ({ ...prev, [id]: [] }))
-    setActiveChatId(id)
+    // Create chat immediately without prompting; we'll prompt on first message
+    dispatch(rtCreateChat({ title: 'New chat' }))
     setDrawerOpen(false)
   }
 
   const switchChat = (id) => {
-    setActiveChatId(id)
+    dispatch(setActiveChat(id))
     setDrawerOpen(false)
   }
 
@@ -50,30 +45,22 @@ const Home = () => {
     const text = input.trim()
     if (!text) return
 
-    // Add user message
-    const userMsg = { id: uid(), role: 'user', text }
-    setMessagesByChat(prev => ({
-      ...prev,
-      [activeChatId]: [...(prev[activeChatId] || []), userMsg],
-    }))
-    setInput('')
+    // If this is the very first user message in this chat, prompt for a name
+    const currentMessages = messagesByChat[activeChatId] || []
+    if (currentMessages.length === 0) {
+      const name = window.prompt('Name this chat session', 'New chat')
+      if (name !== null) {
+        dispatch(setChatTitle({ id: activeChatId, title: name }))
+      }
+    }
 
-    // If this is the first message for the chat, update its title from the text
-    setChats(prev => {
-      const next = prev.map(c => c.id === activeChatId ? { ...c, title: c.title === 'New chat' ? text.slice(0, 30) || 'New chat' : c.title } : c)
-      // Move the active chat to the top (most recent first)
-      const active = next.find(c => c.id === activeChatId)
-      const others = next.filter(c => c.id !== activeChatId)
-      return [active, ...others]
-    })
+    // Add user message to redux
+    dispatch(addMessageToChat({ chatId: activeChatId, role: 'user', text }))
+    setInput('')
 
     // Simulate AI reply
     setTimeout(() => {
-      const aiMsg = { id: uid(), role: 'ai', text: `You said: ${text}` }
-      setMessagesByChat(prev => ({
-        ...prev,
-        [activeChatId]: [...(prev[activeChatId] || []), aiMsg],
-      }))
+      dispatch(addMessageToChat({ chatId: activeChatId, role: 'ai', text: `You said: ${text}` }))
     }, 350)
   }
 
@@ -92,7 +79,7 @@ const Home = () => {
       </aside>
 
       {/* Main chat area */}
-      <section className="chat-main">
+  <section className={`chat-main ${messages.length === 0 ? 'landing' : ''}`}>
         {/* Mobile top bar with hamburger */}
         <div className="chat-mobilebar">
           <button className="hamburger" onClick={() => setDrawerOpen(true)}>☰</button>
@@ -100,18 +87,23 @@ const Home = () => {
         </div>
 
         {messages.length === 0 ? (
-          // Landing hero state (image1 style)
-          <div className="landing-hero">
-            <h1 className="landing-title">What are you working on?</h1>
-            <div className="landing-composer">
-              <ChatComposer
-                input={input}
-                setInput={setInput}
-                onSubmit={sendMessage}
-                variant="landing"
-              />
+          // Landing state: desktop has centered hero with composer; mobile has composer pinned at bottom
+          <>
+            <div className="landing-hero">
+              <h1 className="landing-title">What are you working on?</h1>
+              <div className="landing-composer show-desktop">
+                <ChatComposer
+                  input={input}
+                  setInput={setInput}
+                  onSubmit={sendMessage}
+                  variant="landing"
+                />
+              </div>
             </div>
-          </div>
+            <div className="show-mobile">
+              <ChatComposer input={input} setInput={setInput} onSubmit={sendMessage} />
+            </div>
+          </>
         ) : (
           // Conversation state (image2 style)
           <>
