@@ -8,4 +8,7 @@ const router = express.Router()
 /* POST /chat/ */
 router.post('/',authMiddleware.authUser,chatController.createChat)
 
+/* GET /chat/ */
+router.get('/',authMiddleware.authUser,chatController.getChats)
+
 module.exports = router

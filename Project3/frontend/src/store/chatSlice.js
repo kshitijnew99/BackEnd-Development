@@ -61,6 +61,9 @@ const chatSlice = createSlice({
     setActiveChat: (state, action) => {
       state.activeChatId = action.payload
     },
+    setChat(state, action) {
+      state.chat = action.payload;
+    },
     setChatTitle: (state, action) => {
       const { id, title } = action.payload || {}
       const chat = state.chats.find(c => c.id === id)
@@ -72,5 +75,5 @@ const chatSlice = createSlice({
   },
 })
 
-export const { createChat, switchChat, sendMessage, addMessageToChat, setActiveChat, setChatTitle } = chatSlice.actions
+export const { createChat, switchChat, sendMessage, addMessageToChat, setActiveChat, setChat , setChatTitle } = chatSlice.actions
 export default chatSlice.reducer

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { createChat as rtCreateChat, setActiveChat, addMessageToChat, setChatTitle } from '../store/chatSlice'
+import { createChat as rtCreateChat, setActiveChat, addMessageToChat, setChatTitle , setChat } from '../store/chatSlice'
 import SidebarContent from '../components/chat/SidebarContent'
 import ChatHeader from '../components/chat/ChatHeader'
 import ChatMessages from '../components/chat/ChatMessages'
@@ -29,6 +29,13 @@ const Home = () => {
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
+
+    axios.get('http://localhost:3000/chat/', { withCredentials: true })
+    .then((res)=>{
+      console.log(res.data);
+      dispatch(setChat(res.data.chats));
+      
+    })
   }, [messages, activeChatId])
 
   const createNewChat = () => {
