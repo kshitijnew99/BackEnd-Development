@@ -18,7 +18,6 @@ const SidebarContent = ({ chats, activeChatId, onNewChat, onSwitchChat }) => {
       // ignore
     }
   }, [])
-
   // Listen to cross-tab updates (optional)
   useEffect(() => {
     const onStorage = () => {

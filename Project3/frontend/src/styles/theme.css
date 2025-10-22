@@ -115,6 +115,7 @@
 .chat-brand {
   font-weight: 700;
   margin-bottom: var(--space-6);
+  text-align: center;
 }
 
 .chat-new {

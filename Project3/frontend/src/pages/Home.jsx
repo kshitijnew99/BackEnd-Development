@@ -9,6 +9,7 @@ import ChatComposer from '../components/chat/ChatComposer'
 const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36)
 
 const Home = () => {
+  
   const dispatch = useDispatch()
   const chats = useSelector(state => state.chat.chats)
   const activeChatId = useSelector(state => state.chat.activeChatId)
@@ -112,7 +113,7 @@ const Home = () => {
             <ChatComposer input={input} setInput={setInput} onSubmit={sendMessage} />
           </>
         )}
-      </section>
+  </section>
 
       {/* Mobile drawer */}
       <div className={`drawer ${drawerOpen ? 'open' : ''}`} onClick={() => setDrawerOpen(false)}>
