@@ -34,8 +34,14 @@ async function RegisterUser(req, res) {
       process.env.JWT_TOKEN
     );
 
-    // Set cookie
-    res.cookie("token", token, { httpOnly: true });
+    // Set cookie (local dev: SameSite Lax works across http://localhost:5173 -> 3000)
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: false, // set true only behind HTTPS
+      path: '/',
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    });
 
     // Success response
     res.status(201).json({
@@ -78,7 +84,14 @@ async function LoginUser(req,res) {
     process.env.JWT_TOKEN
   );
 
-  res.cookie("token", token);
+  // Set cookie with consistent options
+  res.cookie("token", token, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: false,
+    path: '/',
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+  });
 
   res.status(201).json({
       message: "User Login successfully",

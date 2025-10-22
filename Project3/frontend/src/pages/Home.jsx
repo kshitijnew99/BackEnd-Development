@@ -5,11 +5,12 @@ import SidebarContent from '../components/chat/SidebarContent'
 import ChatHeader from '../components/chat/ChatHeader'
 import ChatMessages from '../components/chat/ChatMessages'
 import ChatComposer from '../components/chat/ChatComposer'
+import axios from 'axios'
 
 const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36)
 
 const Home = () => {
-  
+
   const dispatch = useDispatch()
   const chats = useSelector(state => state.chat.chats)
   const activeChatId = useSelector(state => state.chat.activeChatId)
@@ -31,8 +32,21 @@ const Home = () => {
   }, [messages, activeChatId])
 
   const createNewChat = () => {
-    // Create chat immediately without prompting; we'll prompt on first message
-    dispatch(rtCreateChat({ title: 'New chat' }))
+    // Prompt for a session name first
+    const name = window.prompt('Name this chat session', 'New chat')
+    const title = (name && name.trim()) ? name.trim() : 'New chat'
+
+    // Create chat locally (Redux) with the given title and activate it
+    dispatch(rtCreateChat({ title }))
+
+    // Also create chat on the server (requires auth cookie)
+    axios.post('http://localhost:3000/chat/', { title }, { withCredentials: true })
+      .then((res) => {
+        console.log('New chat created on server:', res?.data)
+      })
+      .catch((err) => {
+        console.log('Failed to create chat on server:', err?.response?.data || err.message)
+      })
     setDrawerOpen(false)
   }
 
@@ -46,14 +60,7 @@ const Home = () => {
     const text = input.trim()
     if (!text) return
 
-    // If this is the very first user message in this chat, prompt for a name
-    const currentMessages = messagesByChat[activeChatId] || []
-    if (currentMessages.length === 0) {
-      const name = window.prompt('Name this chat session', 'New chat')
-      if (name !== null) {
-        dispatch(setChatTitle({ id: activeChatId, title: name }))
-      }
-    }
+    // Naming and server creation now happen when clicking "+ New Chat"
 
     // Add user message to redux
     dispatch(addMessageToChat({ chatId: activeChatId, role: 'user', text }))

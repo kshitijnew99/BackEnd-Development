@@ -3,7 +3,7 @@ import { createSlice, nanoid } from '@reduxjs/toolkit'
 const initialId = 'c1'
 
 const initialState = {
-  chats: [{ id: initialId, title: 'New chat' }],
+  chats: [{ id: initialId, title: 'New chat' }],  
   activeChatId: initialId,
   messagesByChat: { [initialId]: [] },
 }
