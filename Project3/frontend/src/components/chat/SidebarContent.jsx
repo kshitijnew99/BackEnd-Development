@@ -1,8 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { useDispatch } from 'react-redux'
+import { resetChats } from '../../store/chatSlice'
 import { useNavigate } from 'react-router-dom'
 
 const SidebarContent = ({ chats, activeChatId, onNewChat, onSwitchChat }) => {
   const scrollRef = useRef(null)
+  const dispatch = useDispatch()
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -57,6 +60,7 @@ const SidebarContent = ({ chats, activeChatId, onNewChat, onSwitchChat }) => {
 
   const logout = () => {
     try { localStorage.removeItem('user') } catch (_) {}
+    dispatch(resetChats())
     setUser(null)
     setMenuOpen(false)
     navigate('/')
