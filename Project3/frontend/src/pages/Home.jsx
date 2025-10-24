@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { createChat as rtCreateChat, setActiveChat, addMessageToChat, setChatTitle , setChats } from '../store/chatSlice'
+import { createChat, setActiveChat, addMessageToChat, setChatTitle , setChats } from '../store/chatSlice'
 import SidebarContent from '../components/chat/SidebarContent'
 import ChatHeader from '../components/chat/ChatHeader'
 import ChatMessages from '../components/chat/ChatMessages'
@@ -41,22 +41,21 @@ const Home = () => {
       .catch(() => {})
   }, [])
 
-  const createNewChat = () => {
+  const createNewChat =  async () => {
     // Prompt for a session name first
     const name = window.prompt('Name this chat session', 'New chat')
     const title = (name && name.trim()) ? name.trim() : 'New chat'
 
-    // Create chat locally (Redux) with the given title and activate it
-    dispatch(rtCreateChat({ title }))
-
     // Also create chat on the server (requires auth cookie)
-    axios.post('http://localhost:3000/chat/', { title }, { withCredentials: true })
-      .then((res) => {
-        console.log('New chat created on server:', res?.data)
-      })
-      .catch((err) => {
-        console.log('Failed to create chat on server:', err?.response?.data || err.message)
-      })
+    const res = await axios.post('http://localhost:3000/chat/', { title }, { withCredentials: true })
+
+    console.log('New chat created on server:', res.data.chat)
+
+    // Create chat locally (Redux) with the given title and activate it
+    dispatch(createChat(res.data.chat))
+
+
+      
     setDrawerOpen(false)
   }
 

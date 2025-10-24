@@ -75,13 +75,9 @@ const chatSlice = createSlice({
       saveState(state)
     },
     createChat: (state, action) => {
-      const id = nanoid()
-      const provided = action && action.payload && action.payload.title
-      const title = (typeof provided === 'string' ? provided.trim() : '') || 'New chat'
-      state.chats.unshift({ id, title })
-      state.messagesByChat[id] = []
-      state.activeChatId = id
-      saveState(state)
+      const { _id , title } = action.payload || {};
+      state.chats.unshift({  _id, title : title || 'New chat' , message : []});
+      state.activeChatId = _id;
     },
     switchChat: (state, action) => {
       state.activeChatId = action.payload

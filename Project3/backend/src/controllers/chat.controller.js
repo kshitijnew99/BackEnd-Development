@@ -33,7 +33,8 @@ async function getChats(req,res){
             _id : chat._id,
             title: chat.title,  
             lastActivity: chat.lastActivity,
-            user : chat.user
+            user : chat.user,
+            name : chat.user.fullName
         }))
     }); 
 }
