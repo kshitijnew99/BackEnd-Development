@@ -24,7 +24,7 @@ function loadState() {
     if (parsed && Array.isArray(parsed.chats) && typeof parsed.messagesByChat === 'object') {
       return {
         chats: parsed.chats,
-        activeChatId: parsed.activeChatId || null,
+        active_id: parsed.active_id || null,
         messagesByChat: parsed.messagesByChat,
       }
     }
@@ -36,7 +36,7 @@ function saveState(state) {
   try {
     const snapshot = {
       chats: state.chats,
-      activeChatId: state.activeChatId || null,
+      active_id: state.active_id || null,
       messagesByChat: state.messagesByChat,
     }
     localStorage.setItem(getStorageKey(), JSON.stringify(snapshot))
@@ -45,7 +45,7 @@ function saveState(state) {
 
 const initialState = loadState() || {
   chats: [],
-  activeChatId: null,
+  active_id: null,
   messagesByChat: {},
 }
 
@@ -66,10 +66,10 @@ const chatSlice = createSlice({
       const map = { ...(persisted?.messagesByChat || {}) }
       for (const c of normalized) map[c.id] = map[c.id] || state.messagesByChat[c.id] || []
       state.messagesByChat = map
-      if (!state.activeChatId || !map[state.activeChatId]) {
+      if (!state.active_id || !map[state.active_id]) {
         // Prefer last active from persisted state
-        state.activeChatId = persisted?.activeChatId && map[persisted.activeChatId]
-          ? persisted.activeChatId
+        state.active_id = persisted?.active_id && map[persisted.active_id]
+          ? persisted.active_id
           : (normalized[0]?.id || null)
       }
       saveState(state)
@@ -77,52 +77,52 @@ const chatSlice = createSlice({
     createChat: (state, action) => {
       const { _id , title } = action.payload || {};
       state.chats.unshift({  _id, title : title || 'New chat' , message : []});
-      state.activeChatId = _id;
+      state.active_id = _id;
     },
     switchChat: (state, action) => {
-      state.activeChatId = action.payload
+      state.active_id = action.payload
       saveState(state)
     },
     sendMessage: {
       reducer: (state, action) => {
-        const { chatId, role, text } = action.payload
+        const { _id, role, text } = action.payload
         const msg = { id: nanoid(), role, text }
-        const arr = state.messagesByChat[chatId] || []
+        const arr = state.messagesByChat[_id] || []
         arr.push(msg)
-        state.messagesByChat[chatId] = arr
+        state.messagesByChat[_id] = arr
         // set title from first user message
-        const chat = state.chats.find(c => c.id === chatId)
+        const chat = state.chats.find(c => c.id === _id)
         if (chat && chat.title === 'New chat' && role === 'user') {
           chat.title = text.slice(0, 30) || 'New chat'
         }
         // move chat to top as most recent
-        state.chats = [chat, ...state.chats.filter(c => c.id !== chatId)]
+        state.chats = [chat, ...state.chats.filter(c => c.id !== _id)]
         saveState(state)
       },
       prepare: ({ role, text }, getState) => {
-        return { payload: { chatId: getState ? getState().chat.activeChatId : '', role, text } }
+        return { payload: { _id: getState ? getState().chat.active_id : '', role, text } }
       },
     },
     addMessageToChat: (state, action) => {
-      const { chatId, role, text } = action.payload
+      const { _id, role, text } = action.payload
       const msg = { id: nanoid(), role, text }
-      const arr = state.messagesByChat[chatId] || []
+      const arr = state.messagesByChat[_id] || []
       arr.push(msg)
-      state.messagesByChat[chatId] = arr
+      state.messagesByChat[_id] = arr
       // If first user message, set chat title from it
-      const chat = state.chats.find(c => c.id === chatId)
+      const chat = state.chats.find(c => c.id === _id)
       if (chat && chat.title === 'New chat' && role === 'user') {
         chat.title = (text || '').slice(0, 30) || 'New chat'
       }
       // Move active chat to top as most recent
       if (chat) {
-        state.chats = [chat, ...state.chats.filter(c => c.id !== chatId)]
+        state.chats = [chat, ...state.chats.filter(c => c.id !== _id)]
       }
       saveState(state)
     },
     setActiveChat: (state, action) => {
       const id = action.payload
-      state.activeChatId = id
+      state.active_id = id
       // Move the selected chat to the top so the currently active chat is first
       const chat = state.chats.find(c => c.id === id)
       if (chat) {
@@ -141,7 +141,7 @@ const chatSlice = createSlice({
     },
     resetChats: (state) => {
       state.chats = []
-      state.activeChatId = null
+      state.active_id = null
       state.messagesByChat = {}
       // Intentionally do NOT remove persisted state; we keep per-user history
     },

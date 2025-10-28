@@ -77,7 +77,7 @@ const Home = () => {
 
     // Simulate AI reply
     setTimeout(() => {
-      dispatch(addMessageToChat({ chatId: activeChatId, role: 'ai', text: `You said: ${text}` }))
+      dispatch(addMessageToChat({ chatId: activeChatId, role: 'model', text: `You said: ${text}` }))
     }, 350)
   }
 
@@ -114,7 +114,7 @@ const Home = () => {
                   setInput={setInput}
                   onSubmit={sendMessage}
                   variant="landing"
-                />
+                /> 
               </div>
             </div>
             <div className="show-mobile">
