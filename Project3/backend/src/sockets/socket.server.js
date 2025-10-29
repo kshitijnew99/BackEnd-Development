@@ -9,7 +9,13 @@ const { createVectorMemory, queryMemory } = require("../services/vector.service"
 
 
 function initSocketServer(httpServer) {
-  const io = new Server(httpServer, {});
+  const io = new Server(httpServer, {
+    cors: {
+      origin : "http://localhost:5173",
+      allowedHeaders: ["Content-Type", "Authorization"],
+      credentials: true
+    }
+  });
 
   // socket.io middleware
   io.use(async (socket, next) => {
@@ -37,6 +43,9 @@ function initSocketServer(httpServer) {
 
   // socket.io starting server
   io.on("connection", (socket) => {
+
+    console.log("User connected : ", socket.user._id);
+    
 
     socket.on("ai-message", async (MessagePayload) => {
       

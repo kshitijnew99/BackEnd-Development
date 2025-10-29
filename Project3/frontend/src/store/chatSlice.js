@@ -75,12 +75,12 @@ const chatSlice = createSlice({
       saveState(state)
     },
     createChat: (state, action) => {
-      const { _id, id, title } = action.payload || {}
-      const chatId = id || _id || nanoid()
-      state.chats.unshift({ id: chatId, title: title || 'New chat' })
+      const { _id,  title } = action.payload || {}
+      state.chats.unshift({ _id , title: title || 'New chat', messages : [] })
       // ensure message bucket exists
-      state.messagesByChat[chatId] = state.messagesByChat[chatId] || []
-      state.activeChatId = chatId
+
+      state.messagesByChat[_id] = state.messagesByChat[_id] || []
+      state.activeChatId = _id;
       saveState(state)
     },
     addMessageToChat: (state, action) => {

@@ -6,6 +6,7 @@ import ChatHeader from '../components/chat/ChatHeader'
 import ChatMessages from '../components/chat/ChatMessages'
 import ChatComposer from '../components/chat/ChatComposer'
 import axios from 'axios'
+import { io } from "socket.io-client";
 
 const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36)
 
@@ -19,6 +20,9 @@ const Home = () => {
 
   // User input
   const [input, setInput] = useState('')
+  // Socket state
+  const [Socket, setSocket] = useState(null);
+
 
   // Derived state
   const messages = useMemo(() => messagesByChat[activeChatId] || [], [messagesByChat, activeChatId])
@@ -38,7 +42,18 @@ const Home = () => {
       .then((res) => {
         dispatch(setChats(res.data.chats))
       })
-      .catch(() => {})
+
+      const tempSocket = io("http://localhost:3000",{
+        withCredentials: true,
+      });
+
+      tempSocket.on("ai-response", (message) => {
+        console.log("Received AI response :",message);
+        dispatch(addMessageToChat(activeChat,message.content));
+        dispatch(sendingFinished());
+      })
+      
+      setSocket(tempSocket);
   }, [])
 
   const createNewChat =  async () => {
@@ -67,17 +82,20 @@ const Home = () => {
   const sendMessage = async (e) => {
     e.preventDefault()
     const text = input.trim()
+    console.log("sendMessage:", text);
+    
     if (!text) return
-
-    // Naming and server creation now happen when clicking "+ New Chat"
-
+    
     // Add user message to redux
     dispatch(addMessageToChat({ chatId: activeChatId, role: 'user', text }))
     setInput('')
 
     // Simulate AI reply
     setTimeout(() => {
-      dispatch(addMessageToChat({ chatId: activeChatId, role: 'model', text: `You said: ${text}` }))
+      Socket.emit("ai-message", {
+        chatId: activeChatId,
+        content: `You said: ${text}`
+      })
     }, 350)
   }
 
