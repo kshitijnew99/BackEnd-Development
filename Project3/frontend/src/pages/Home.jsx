@@ -49,8 +49,7 @@ const Home = () => {
 
       tempSocket.on("ai-response", (message) => {
         console.log("Received AI response :",message);
-        dispatch(addMessageToChat(activeChat,message.content));
-        dispatch(sendingFinished());
+        dispatch(addMessageToChat({ chatId: message.chat, role: 'model', text: message.content }));
       })
       
       setSocket(tempSocket);
@@ -85,18 +84,18 @@ const Home = () => {
     console.log("sendMessage:", text);
     
     if (!text) return
-    
+
     // Add user message to redux
     dispatch(addMessageToChat({ chatId: activeChatId, role: 'user', text }))
     setInput('')
 
-    // Simulate AI reply
-    setTimeout(() => {
+    // Send message to AI via socket
+    if (Socket && activeChatId) {
       Socket.emit("ai-message", {
         chatId: activeChatId,
-        content: `You said: ${text}`
+        content: text
       })
-    }, 350)
+    }
   }
 
   // Components imported above will render sidebar, header, messages and composer

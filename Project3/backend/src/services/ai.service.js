@@ -6,9 +6,15 @@ const ai = new GoogleGenAI({
 
 async function generateResponse(contentArr) {
     try {
+        // Convert {role, text} to Gemini format {role, parts: [{text}]}
+        const formattedContents = contentArr.map(item => ({
+            role: item.role === 'model' ? 'model' : 'user',
+            parts: [{ text: item.text }]
+        }));
+
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
-            contents: contentArr, // should be [{ text: "..." }]
+            contents: formattedContents,
             config : {
                 temperature: 0.7
             }
