@@ -107,7 +107,7 @@
   display: none; /* hidden on mobile */
   background: var(--chat-sidebar);
   border-right: 1px solid var(--color-border);
-  padding: var(--space-3) var(--space-2);
+  padding: var(--space-3) var(--space-3);
   overflow: hidden; /* we'll manage inner scroll */
   height: 100%; /* fill fixed layout height */
 }
@@ -240,11 +240,11 @@
 }
 .chat-row { 
   display: flex;
-  padding: var(--space-6) var(--space-4);
+  padding: var(--space-8) var(--space-6);
   border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 .chat-row.user { 
-  background: rgba(255,255,255,0.02);
+  background: transparent;
   justify-content: flex-end;
 }
 .chat-row.ai { 
@@ -252,29 +252,49 @@
   justify-content: flex-start;
 }
 .chat-bubble {
-  max-width: 48rem;
-  width: 100%;
-  padding: 0;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
+  max-width: 52rem;
+  padding: var(--space-4) var(--space-5);
   line-height: 1.75;
   font-size: 15px;
+  word-wrap: break-word;
 }
 .chat-bubble.user { 
-  background: transparent;
+  background: rgba(255, 255, 255, 0.266);
   color: var(--chat-text);
-  text-align: right;
+  text-align: left;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  width: 40%;
+  max-width: fit-content;
 }
 .chat-bubble.ai { 
   background: transparent;
   color: var(--chat-text);
+  border: none;
+  box-shadow: none;
+  width: 100%;
 }
 .chat-bubble p {
   margin: 0 0 var(--space-3) 0;
 }
 .chat-bubble p:last-child {
   margin-bottom: 0;
+}
+.chat-bubble strong {
+  font-weight: 600;
+  color: rgba(255,255,255,0.95);
+}
+.chat-bubble em {
+  font-style: italic;
+  color: rgba(255,255,255,0.85);
+}
+.chat-bubble ul, .chat-bubble ol {
+  margin: var(--space-2) 0;
+  padding-left: var(--space-5);
+}
+.chat-bubble li {
+  margin: var(--space-1) 0;
 }
 
 .chat-composer {
@@ -391,7 +411,7 @@
 
 /* Desktop breakpoint */
 @media (min-width: 900px) {
-  .chat-layout { grid-template-columns: 260px 1fr; }
+  .chat-layout { grid-template-columns: 280px 1fr; }
   .chat-sidebar { display: flex; flex-direction: column; }
   .chat-mobilebar, .drawer { display: none !important; }
   .chat-main.landing { grid-template-rows: 1fr; } /* desktop: only center track */
@@ -401,14 +421,14 @@
   /* Center chat content on wide screens */
   .chat-row {
     justify-content: center;
-    padding: var(--space-6) var(--space-8);
+    padding: var(--space-8) var(--space-8);
   }
   .chat-row .chat-bubble {
-    max-width: 48rem;
+    max-width: 52rem;
   }
   .chat-composer {
     padding: var(--space-4);
-    max-width: 48rem;
+    max-width: 52rem;
     margin: 0 auto;
     width: 100%;
   }
