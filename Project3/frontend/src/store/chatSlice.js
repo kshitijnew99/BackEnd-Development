@@ -75,12 +75,12 @@ const chatSlice = createSlice({
       saveState(state)
     },
     createChat: (state, action) => {
-      const { _id,  title } = action.payload || {}
-      state.chats.unshift({ _id , title: title || 'New chat', messages : [] })
+      const { _id, id, title } = action.payload || {}
+      const chatId = id || _id || nanoid()
+      state.chats.unshift({ id: chatId, title: title || 'New chat' })
       // ensure message bucket exists
-
-      state.messagesByChat[_id] = state.messagesByChat[_id] || []
-      state.activeChatId = _id;
+      state.messagesByChat[chatId] = state.messagesByChat[chatId] || []
+      state.activeChatId = chatId
       saveState(state)
     },
     addMessageToChat: (state, action) => {
@@ -92,13 +92,13 @@ const chatSlice = createSlice({
       arr.push(msg)
       state.messagesByChat[targetId] = arr
       // If first user message, set chat title from it
-      const chat = state.chats.find(c => c.id === targetId)
+      const chat = state.chats.find(c => c.id === targetId || c._id === targetId)
       if (chat && chat.title === 'New chat' && role === 'user') {
         chat.title = (text || '').slice(0, 30) || 'New chat'
       }
       // Move active chat to top as most recent
       if (chat) {
-        state.chats = [chat, ...state.chats.filter(c => c.id !== targetId)]
+        state.chats = [chat, ...state.chats.filter(c => c.id !== targetId && c._id !== targetId)]
       }
       saveState(state)
     },
@@ -106,15 +106,15 @@ const chatSlice = createSlice({
       const id = action.payload
       state.activeChatId = id
       // Move the selected chat to the top so the currently active chat is first
-      const chat = state.chats.find(c => c.id === id)
+      const chat = state.chats.find(c => c.id === id || c._id === id)
       if (chat) {
-        state.chats = [chat, ...state.chats.filter(c => c.id !== id)]
+        state.chats = [chat, ...state.chats.filter(c => (c.id !== id && c._id !== id))]
       }
       saveState(state)
     },
     setChatTitle: (state, action) => {
       const { id, title } = action.payload || {}
-      const chat = state.chats.find(c => c.id === id)
+      const chat = state.chats.find(c => c.id === id || c._id === id)
       if (chat) {
         const t = (typeof title === 'string' ? title.trim() : '') || 'New chat'
         chat.title = t.slice(0, 60)

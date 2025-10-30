@@ -1,6 +1,7 @@
 const { Server } = require("socket.io");
 const cookie = require("cookie");
 const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
 const userModel = require("../models/user.models");
 const { generateResponse, generateVector } = require("../services/ai.service");
 const messageModel = require("../models/message.models");
@@ -44,16 +45,19 @@ function initSocketServer(httpServer) {
   // socket.io starting server
   io.on("connection", (socket) => {
 
-    console.log("User connected : ", socket.user._id);
+    
     
 
     socket.on("ai-message", async (MessagePayload) => {
+      
+      // Convert chatId string to ObjectId for MongoDB queries
+      const chatObjectId = new mongoose.Types.ObjectId(MessagePayload.chatId);
       
       // SEQUENCE: 1 2  (parallel execution)
       const [message, vector] = await Promise.all([
         // Task 1: User message save to DB
         messageModel.create({
-          chatId: MessagePayload.chatId,
+          chatId: chatObjectId,
           user: socket.user._id,
           content: MessagePayload.content,
           role: "user",
@@ -69,45 +73,59 @@ function initSocketServer(httpServer) {
           messageId: message._id,
           metadata: {
             chatId: MessagePayload.chatId,
-            user: socket.user._id,
+            user: socket.user._id.toString(),
             text: MessagePayload.content
           }
       })
 
       // SEQUENCE: 3 5 (parallel execution)
       const [memory, chatHistoryRow] = await Promise.all([
-        // Task 3: Query pinecone for related memories
+        // Task 3: Query pinecone for related memories from OTHER chats
         queryMemory({
           queryVector: vector,
-          limit: 1,
+          limit: 5, // Retrieve top 5 relevant memories for better context
           metadata: {
-            user: socket.user._id
+            user: socket.user._id.toString()
+            // Note: We search across ALL user's chats; will filter out current chat below
           }
         }),
-        // Task 5: Get chat history from DB
+        // Task 5: Get chat history from DB - use ObjectId for query
         messageModel.find({
-          chatId: MessagePayload.chatId,
+          chatId: chatObjectId,
         }).sort({ createdAt: 1 }).limit(20).lean()
       ]);
 
-      const chatHistory = chatHistoryRow.reverse();
+      console.log("🔍 Chat History Debug:");
+      console.log("  Looking for chatId:", MessagePayload.chatId);
+      console.log("  Found messages:", chatHistoryRow.length);
+      console.log("  Message chatIds:", chatHistoryRow.map(m => m.chatId));
 
-      const stm = chatHistory.map(item => ({
+      // chatHistoryRow is already sorted oldest-first (createdAt: 1), keep it that way
+      const stm = chatHistoryRow.map(item => ({
         role: item.role,
         text: item.content
       }));
 
-      const ltm = [{
-        role: "system",
-        text: `These are some previous message from the chat, to generate response 
-        ${memory.map(item => item.metadata.text).join("\n")}`
-      }];
+      // Filter LTM: exclude memories from current chat (they're already in STM)
+      const relevantMemories = memory.filter(m => m.metadata.chatId !== MessagePayload.chatId);
+      
+      // Build context from long-term memory (past conversations from OTHER chats)
+      const ltm = relevantMemories.length > 0 ? [{
+        role: "user",
+        text: `[System Context: Information from your previous conversations with this user]\n${relevantMemories.map((item, idx) => `${idx + 1}. ${item.metadata.text}`).join("\n")}`
+      }] : [];
 
-      console.log("Long term memory:", ltm, "Short term memory:", stm);
+      console.log("🧠 Memory Debug:");
+      console.log("  Total memories found:", memory.length);
+      console.log("  Relevant memories (from other chats):", relevantMemories.length);
+      console.log("  LTM context:", JSON.stringify(ltm, null, 2));
+      console.log("  STM count:", stm.length, "messages from current chat");
 
       // SEQUENCE: 6 (sequential execution)
       // Task 6: Generate response from AI
-      const aiResponse = await generateResponse([...ltm, ...stm]);
+      const combinedPrompt = [...ltm, ...stm];
+      console.log("📤 Sending to Gemini:", JSON.stringify(combinedPrompt, null, 2));
+      const aiResponse = await generateResponse(combinedPrompt);
 
       // SEQUENCE: 10 (sequential execution)
       // Task 10: Send/emit AI response to user
@@ -122,7 +140,7 @@ function initSocketServer(httpServer) {
       const [responseMessage, responseVector] = await Promise.all([
         // Task 7: Save AI response in DB
         messageModel.create({
-          chatId: MessagePayload.chatId,
+          chatId: chatObjectId,
           user: socket.user._id,
           content: aiResponse,
           role: "model",
@@ -138,7 +156,7 @@ function initSocketServer(httpServer) {
         messageId: responseMessage._id,
         metadata: {
           chatId: MessagePayload.chatId,
-          user: socket.user._id,
+          user: socket.user._id.toString(),
           text: aiResponse
         }
       });
