@@ -29,6 +29,7 @@
   --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
+  --space-9: 100px;
 
 
   /* radius */
@@ -240,7 +241,7 @@
 }
 .chat-row { 
   display: flex;
-  padding: var(--space-8) var(--space-6);
+  padding: var(--space-9) var(--space-6);
   border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 .chat-row.user { 
@@ -253,10 +254,12 @@
 }
 .chat-bubble {
   max-width: 52rem;
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-3) var(--space-4);
   line-height: 1.75;
   font-size: 15px;
   word-wrap: break-word;
+  margin-left: 10%;
+  margin-right: 10%;
 }
 .chat-bubble.user { 
   background: rgba(255, 255, 255, 0.266);
