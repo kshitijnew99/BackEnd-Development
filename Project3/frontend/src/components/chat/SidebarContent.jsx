@@ -59,11 +59,20 @@ const SidebarContent = ({ chats, activeChatId, onNewChat, onSwitchChat }) => {
   }, [menuOpen])
 
   const logout = () => {
-    try { localStorage.removeItem('user') } catch (_) {}
+    try { 
+      localStorage.removeItem('user')
+      // Clear all chat state from localStorage
+      const keys = Object.keys(localStorage)
+      keys.forEach(key => {
+        if (key.startsWith('chatState:')) {
+          localStorage.removeItem(key)
+        }
+      })
+    } catch (_) {}
     dispatch(resetChats())
     setUser(null)
     setMenuOpen(false)
-    navigate('/')
+    navigate('/register')
   }
 
   return (
@@ -95,10 +104,10 @@ const SidebarContent = ({ chats, activeChatId, onNewChat, onSwitchChat }) => {
             <button
               ref={avatarRef}
               className="avatar-btn"
-              title={user.firstName || 'User'}
+              title={user.firstName || user.email || 'User'}
               onClick={() => setMenuOpen(v => !v)}
             >
-              {(user.firstName?.[0] || '?').toUpperCase()}
+              {user.firstName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || '👤'}
             </button>
             {menuOpen && (
               <div className="menu" ref={menuRef} role="menu">

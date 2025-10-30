@@ -6,13 +6,15 @@ import ChatHeader from '../components/chat/ChatHeader'
 import ChatMessages from '../components/chat/ChatMessages'
 import ChatComposer from '../components/chat/ChatComposer'
 import axios from 'axios'
-import { io } from "socket.io-client";
+import { io } from "socket.io-client"
+import { useNavigate } from 'react-router-dom'
 
 const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36)
 
 const Home = () => {
 
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const chats = useSelector(state => state.chat.chats)
   const activeChatId = useSelector(state => state.chat.activeChatId)
   const messagesByChat = useSelector(state => state.chat.messagesByChat)
@@ -21,7 +23,10 @@ const Home = () => {
   // User input
   const [input, setInput] = useState('')
   // Socket state
-  const [Socket, setSocket] = useState(null);
+  const [Socket, setSocket] = useState(null)
+  
+  // Check authentication
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
 
   // Derived state
@@ -36,11 +41,34 @@ const Home = () => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, activeChatId])
 
+  // Check if user is authenticated
+  useEffect(() => {
+    try {
+      const user = localStorage.getItem('user')
+      if (!user) {
+        navigate('/register')
+        return
+      }
+      setIsAuthenticated(true)
+    } catch (error) {
+      navigate('/register')
+    }
+  }, [navigate])
+
   // Hydrate chats from backend on mount (after login/route change)
   useEffect(() => {
+    if (!isAuthenticated) return
+
     axios.get('http://localhost:3000/chat/', { withCredentials: true })
       .then((res) => {
         dispatch(setChats(res.data.chats))
+      })
+      .catch((error) => {
+        console.error('Error fetching chats:', error)
+        if (error.response?.status === 401) {
+          localStorage.removeItem('user')
+          navigate('/register')
+        }
       })
 
       const tempSocket = io("http://localhost:3000",{
@@ -53,24 +81,36 @@ const Home = () => {
       })
       
       setSocket(tempSocket);
-  }, [])
+  }, [isAuthenticated])
 
   const createNewChat =  async () => {
+    // Check authentication
+    if (!isAuthenticated) {
+      navigate('/register')
+      return
+    }
+
     // Prompt for a session name first
     const name = window.prompt('Name this chat session', 'New chat')
     const title = (name && name.trim()) ? name.trim() : 'New chat'
 
-    // Also create chat on the server (requires auth cookie)
-    const res = await axios.post('http://localhost:3000/chat/', { title }, { withCredentials: true })
+    try {
+      // Also create chat on the server (requires auth cookie)
+      const res = await axios.post('http://localhost:3000/chat/', { title }, { withCredentials: true })
 
-    console.log('New chat created on server:', res.data.chat)
+      console.log('New chat created on server:', res.data.chat)
 
-    // Create chat locally (Redux) with the given title and activate it
-    dispatch(createChat(res.data.chat))
-
-
+      // Create chat locally (Redux) with the given title and activate it
+      dispatch(createChat(res.data.chat))
       
-    setDrawerOpen(false)
+      setDrawerOpen(false)
+    } catch (error) {
+      console.error('Error creating chat:', error)
+      if (error.response?.status === 401) {
+        localStorage.removeItem('user')
+        navigate('/register')
+      }
+    }
   }
 
   const getMessages = async (chatId) => {
@@ -105,6 +145,13 @@ const Home = () => {
 
   const sendMessage = async (e) => {
     e.preventDefault()
+    
+    // Check authentication
+    if (!isAuthenticated) {
+      navigate('/register')
+      return
+    }
+
     const text = input.trim()
     console.log("sendMessage:", text);
     
@@ -124,6 +171,11 @@ const Home = () => {
   }
 
   // Components imported above will render sidebar, header, messages and composer
+
+  // Don't render until authentication is checked
+  if (!isAuthenticated) {
+    return null
+  }
 
   return (
     <div className="chat-layout">
