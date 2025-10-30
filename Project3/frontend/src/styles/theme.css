@@ -29,7 +29,7 @@
   --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
-  --space-9: 100px;
+  --space-9: 150px;
 
 
   /* radius */
@@ -216,12 +216,6 @@
 
 .chat-main { display: grid; grid-template-rows: auto 1fr auto; height: 100%; overflow: hidden; }
 .chat-main.landing { grid-template-rows: auto 1fr auto; }
-.chat-header {
-  padding: var(--space-4) var(--space-6);
-  border-bottom: 1px solid var(--color-border);
-  font-weight: 600;
-  font-size: var(--text-md);
-}
 
 .chat-messages {
   overflow-y: auto;
@@ -241,8 +235,7 @@
 }
 .chat-row { 
   display: flex;
-  padding: var(--space-9) var(--space-6);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding: var(--space-4) var(--space-3);
 }
 .chat-row.user { 
   background: transparent;
@@ -253,13 +246,10 @@
   justify-content: flex-start;
 }
 .chat-bubble {
-  max-width: 52rem;
   padding: var(--space-3) var(--space-4);
   line-height: 1.75;
   font-size: 15px;
   word-wrap: break-word;
-  margin-left: 10%;
-  margin-right: 10%;
 }
 .chat-bubble.user { 
   background: rgba(255, 255, 255, 0.266);
@@ -268,8 +258,8 @@
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: var(--radius-md);
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  width: 40%;
-  max-width: fit-content;
+  width: fit-content;
+  max-width: 70%;
 }
 .chat-bubble.ai { 
   background: transparent;
@@ -417,26 +407,34 @@
   .chat-layout { grid-template-columns: 280px 1fr; }
   .chat-sidebar { display: flex; flex-direction: column; }
   .chat-mobilebar, .drawer { display: none !important; }
+  .chat-main { grid-template-rows: 1fr auto; } /* desktop: remove mobile header row */
   .chat-main.landing { grid-template-rows: 1fr; } /* desktop: only center track */
   .show-desktop { display: block; }
   .show-mobile { display: none; }
   
   /* Center chat content on wide screens */
   .chat-row {
-    justify-content: center;
     padding: var(--space-8) var(--space-8);
   }
-  .chat-row .chat-bubble {
+  .chat-row.user {
+    justify-content: flex-end !important;
+  }
+  .chat-row.ai {
+    justify-content: flex-start !important;
+  }
+  .chat-bubble.user {
+    max-width: 35%;
+    margin-right: 15%;
+  }
+  .chat-bubble.ai {
     max-width: 52rem;
+    margin-left: 15%;
+    margin-right: 15%;
   }
   .chat-composer {
     padding: var(--space-4);
     max-width: 52rem;
     margin: 0 auto;
     width: 100%;
-  }
-  .chat-header {
-    text-align: center;
-    padding: var(--space-4);
   }
 }
