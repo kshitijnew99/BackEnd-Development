@@ -9,6 +9,7 @@ const SidebarContent = ({ chats, activeChatId, onNewChat, onSwitchChat }) => {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [theme, setTheme] = useState('dark')
   const menuRef = useRef(null)
   const avatarRef = useRef(null)
 
@@ -20,6 +21,15 @@ const SidebarContent = ({ chats, activeChatId, onNewChat, onSwitchChat }) => {
     } catch (_) {
       // ignore
     }
+  }, [])
+
+  // Load theme from localStorage
+  useEffect(() => {
+    try {
+      const savedTheme = localStorage.getItem('theme') || 'dark'
+      setTheme(savedTheme)
+      document.documentElement.setAttribute('data-theme', savedTheme)
+    } catch (_) {}
   }, [])
   // Listen to cross-tab updates (optional)
   useEffect(() => {
@@ -58,6 +68,13 @@ const SidebarContent = ({ chats, activeChatId, onNewChat, onSwitchChat }) => {
     }
   }, [menuOpen])
 
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark'
+    setTheme(newTheme)
+    localStorage.setItem('theme', newTheme)
+    document.documentElement.setAttribute('data-theme', newTheme)
+  }
+
   const logout = () => {
     try { 
       localStorage.removeItem('user')
@@ -95,6 +112,7 @@ const SidebarContent = ({ chats, activeChatId, onNewChat, onSwitchChat }) => {
 
       {/* Footer auth/avatar */}
       <div className="chat-footer">
+        
         {!user ? (
           <button className="auth-btn" onClick={() => navigate('/register')}>
             Sign up / Sign in
@@ -120,6 +138,14 @@ const SidebarContent = ({ chats, activeChatId, onNewChat, onSwitchChat }) => {
             )}
           </div>
         )}
+
+        <button 
+          className="theme-toggle-btn" 
+          onClick={toggleTheme}
+          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+        >
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
       </div>
     </>
   )
