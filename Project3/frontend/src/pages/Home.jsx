@@ -73,8 +73,33 @@ const Home = () => {
     setDrawerOpen(false)
   }
 
+  const getMessages = async (chatId) => {
+    try {
+      const res = await axios.get(`http://localhost:3000/chat/${chatId}/messages`, { 
+        withCredentials: true 
+      })
+      console.log('Fetched messages for chat:', chatId, res.data.messages)
+      
+      // Load messages into Redux for this chat (one by one to maintain order)
+      res.data.messages.forEach(msg => {
+        dispatch(addMessageToChat({ 
+          chatId: chatId, 
+          role: msg.role, 
+          text: msg.content,
+          skipSave: true // Flag to avoid moving chat to top for historical messages
+        }))
+      })
+    } catch (error) {
+      console.error('Error fetching messages:', error)
+    }
+  }
+
   const switchChat = (id) => {
     dispatch(setActiveChat(id))
+    // Fetch messages for the selected chat if not already loaded
+    if (!messagesByChat[id] || messagesByChat[id].length === 0) {
+      getMessages(id)
+    }
     setDrawerOpen(false)
   }
 

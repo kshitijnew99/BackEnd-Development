@@ -84,23 +84,31 @@ const chatSlice = createSlice({
       saveState(state)
     },
     addMessageToChat: (state, action) => {
-      const { chatId, role, text } = action.payload
+      const { chatId, role, text, skipSave } = action.payload
       const targetId = chatId || state.activeChatId
       if (!targetId) return
       const msg = { id: nanoid(), role, text }
       const arr = state.messagesByChat[targetId] || []
-      arr.push(msg)
-      state.messagesByChat[targetId] = arr
+      
+      // Check for duplicate message (same role and text)
+      const isDuplicate = arr.some(m => m.role === role && m.text === text)
+      if (!isDuplicate) {
+        arr.push(msg)
+        state.messagesByChat[targetId] = arr
+      }
+      
       // If first user message, set chat title from it
       const chat = state.chats.find(c => c.id === targetId || c._id === targetId)
       if (chat && chat.title === 'New chat' && role === 'user') {
         chat.title = (text || '').slice(0, 30) || 'New chat'
       }
-      // Move active chat to top as most recent
-      if (chat) {
+      // Move active chat to top as most recent (skip for historical message loading)
+      if (chat && !skipSave) {
         state.chats = [chat, ...state.chats.filter(c => c.id !== targetId && c._id !== targetId)]
       }
-      saveState(state)
+      if (!skipSave) {
+        saveState(state)
+      }
     },
     setActiveChat: (state, action) => {
       const id = action.payload
