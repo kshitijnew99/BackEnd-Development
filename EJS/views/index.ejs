@@ -13,17 +13,34 @@
         html,body{
             height: 100%;
             width: 100%;
+            margin-top: 50px;
         }
-        h1{
-            size: 100px;
+        h1,p{
+            font-size: 40px;
             color: salmon;
             text-align: center;
-            padding-top: 50vh;
+            
         }
 
     </style>
 </head>
 <body>
-    <h1>Welcome to Express view</h1>
+    <!-- <h1>Welcome to Express view</h1> -->
+     
+
+    <!-- <% for(let i = 0 ;i < 5; i++){ %>
+            <p> Item <%= i + 1 %></p>
+    <% } %> -->
+
+    <!--  <% %> is for js Login and <%= %> is for value printing and 
+          <%- %> is for printing html 
+        and these are called delemeter-->
+
+    <% html.forEach(text=>{ %>  
+        
+            <h1> <%- text  %> </h1> 
+        
+    <% }) %>
+
 </body>
 </html>

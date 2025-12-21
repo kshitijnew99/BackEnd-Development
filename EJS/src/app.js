@@ -15,7 +15,11 @@ app.post("/auth/register", (req,res)=>{
 
 // browser pe kuch bhi likho uski methon always GET hoti hai
 app.get("/", (req,res)=>{
-    res.render("index")
+    res.render("index",{ html : [
+        `<h1>Welcome to EJS Template Engine</h1>`,
+        `<p>This is a simple EJS example</p>`,
+        `<button>Click Me</button>`
+    ] });
 });
 
 module.exports = app;
