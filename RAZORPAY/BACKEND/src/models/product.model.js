@@ -16,7 +16,7 @@ const productSchema = new mongoose.Schema({
         }
     },
     description : String,
-    categort : String
+    category : String
 });
 
 

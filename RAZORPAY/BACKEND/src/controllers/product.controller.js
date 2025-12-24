@@ -7,7 +7,7 @@ async function createProduct(req, res) {
 
     try {
 
-        const product = new productModel.create({
+        const product = await productModel.create({
             image , title , description , category , price : {amount , currency}
         })
 
@@ -23,4 +23,4 @@ async function createProduct(req, res) {
     }
 }
 
-module.exports = createProduct;
+module.exports = { createProduct };
