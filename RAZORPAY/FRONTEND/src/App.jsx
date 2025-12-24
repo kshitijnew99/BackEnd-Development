@@ -1,24 +1,111 @@
-import React , {useState, useEffect} from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
+import './App.css';
 
 const App = () => {
 
-    const [product, seTproduct] = useState(null)    
+  const [product, setProduct] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isBuying, setIsBuying] = useState(false);
+
+  const priceLabel = useMemo(() => {
+    const amount = product?.price?.amount;
+    const currency = product?.price?.currency;
+    if (typeof amount !== 'number') return '';
+
+    try {
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: currency || 'INR',
+        maximumFractionDigits: 0,
+      }).format(amount);
+    } catch {
+      return `${currency || 'INR'} ${amount}`;
+    }
+  }, [product]);
 
     useEffect(()=>{
-        axios.get('http://localhost:3000/products/get-item')
-        .then(response=>{
-            seTproduct(response.data.product)
-            console.log(response.data.product);
-            
-        })
+    let isMounted = true;
+    setIsLoading(true);
+    setError(null);
+
+    axios.get('http://localhost:3000/products/get-item')
+    .then(response=>{
+      if (!isMounted) return;
+      setProduct(response.data.product);
+    })
+    .catch((err) => {
+      if (!isMounted) return;
+      setError(err?.response?.data?.message || err.message || 'Failed to load product');
+    })
+    .finally(() => {
+      if (!isMounted) return;
+      setIsLoading(false);
+    });
+
+    return () => {
+      isMounted = false;
+    };
     },[])
 
+  const handleBuyNow = async () => {
+    if (!product || isBuying) return;
+
+    setIsBuying(true);
+    try {
+      await new Promise((r) => setTimeout(r, 450));
+      alert(`Buy Now: ${product.title} (${priceLabel})`);
+    } finally {
+      setIsBuying(false);
+    }
+  };
+
   return (
-    <div>
-        {/* <h1>Hello, World!</h1>
-        <p>This is Kshitij Rao Ranjan/ I'm a WebDeveloper</p> */}
-    </div>
+  <div className="app">
+    {isLoading && (
+      <div className="state">
+        <div className="stateTitle">Loading product…</div>
+        <div className="stateSmall">Fetching from backend.</div>
+      </div>
+    )}
+
+    {!isLoading && error && (
+      <div className="state">
+        <div className="stateTitle">Couldn’t load product</div>
+        <div className="stateSmall">{error}</div>
+      </div>
+    )}
+
+    {!isLoading && !error && product && (
+      <div className="card">
+        <div className="media">
+          <img className="image" src={product.image} alt={product.title} />
+        </div>
+
+        <div className="content">
+          <div className="titleRow">
+            <div className="title">{product.title}</div>
+            <div className="badge">{product.category}</div>
+          </div>
+
+          <div className="desc">{product.description}</div>
+
+          <div className="meta">
+            <div>
+              <div className="price">{priceLabel}</div>
+              <div className="sub">Product ID: {product._id}</div>
+            </div>
+            <div className="actions">
+              <button className="button" onClick={handleBuyNow} disabled={isBuying}>
+                {isBuying ? 'Processing…' : 'Buy Now'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
   )
 }
 
