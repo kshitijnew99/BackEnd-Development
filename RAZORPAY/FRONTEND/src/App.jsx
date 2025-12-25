@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import './App.css';
+import PaymentButton from './paymentButton';
 
 const App = () => {
 
@@ -98,9 +99,7 @@ const App = () => {
               <div className="sub">Product ID: {product._id}</div>
             </div>
             <div className="actions">
-              <button className="button" onClick={handleBuyNow} disabled={isBuying}>
-                {isBuying ? 'Processing…' : 'Buy Now'}
-              </button>
+              <PaymentButton/>
             </div>
           </div>
         </div>
