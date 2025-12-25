@@ -25,7 +25,7 @@ async function createProduct(req, res) {
 
 async function getItem(req,res){
     try{
-        const product  = await productModel.find()
+        const product  = await productModel.findOne()
 
         if (!product) {
             return res.status(200).send({

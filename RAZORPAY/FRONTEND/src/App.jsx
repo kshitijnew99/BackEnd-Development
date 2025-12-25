@@ -33,7 +33,8 @@ const App = () => {
     axios.get('http://localhost:3000/products/get-item')
     .then(response=>{
       if (!isMounted) return;
-      setProduct(response.data.product);
+      const nextProduct = response?.data?.product;
+      setProduct(Array.isArray(nextProduct) ? nextProduct[0] : nextProduct);
     })
     .catch((err) => {
       if (!isMounted) return;
