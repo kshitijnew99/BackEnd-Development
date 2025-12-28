@@ -55,6 +55,6 @@ async function getItem(req,res){
             error: err.message,
         })
     }
-} 
+}   
 
 module.exports = { createProduct  , getItem };
